@@ -1,5 +1,5 @@
 
-''' Client tools for Isilon restful api '''
+''' Client tools for Unifi restful api '''
 
 #
 # BEGIN py2 compatibility section
@@ -357,7 +357,6 @@ class UnifiController(UnifiClientBase):
     logout = partialmethod(UnifiClientBase.request, 'GET', 'api/logout')
     _sites = partialmethod(UnifiClientBase.request, 'GET', 'api/self/sites')
 
-
     def __init__(self, *args, **kwargs):
 
         UnifiClientBase.__init__(self, *args, **kwargs)
@@ -368,25 +367,6 @@ class UnifiController(UnifiClientBase):
         ret =  self.post('api/login', username=username, password=password, remember=remember)
         self.sites = self._sites()
         return ret
-
-
-        # def _test_connection(self):
-        #     try:
-        #         out = self.get('status', raise_on_error=False)
-        #         self.server_version = out.meta['server_version']
-        #         logger.debug('Found server version %s at %s', self.server_version, self.endpoint)
-        #         if self.server_version not in KNOWN_GOOD_API_VERSIONS and  self.server_version not in WARNED_API:
-        #             logger.warning("API version %s has not been tested", self.server_version)
-        #             WARNED_API.append(self.server_version)
-        #         out = self.get('api/self',  raise_on_error=False)
-        #         name = out[0]['name']
-        #         if not self.username:
-        #             self.username = name
-        #         if name == self.username:
-        #             self.authenticated = True
-        #     except:
-        #         self.authenticated = False
-
     
 class UnifiSite(UnifiClientBase): 
 
