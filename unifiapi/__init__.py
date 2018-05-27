@@ -1,4 +1,4 @@
-from unifiapi.api import UnifiApiError, UnifiController, UnifiSite, quiet
+from unifiapi.api import UnifiApiError, controller, UnifiSite, quiet
 
-__all__ = [ "UnifiController", "UnifiSite" ]
+__all__ = [ "controller", "UnifiSite" ]
 

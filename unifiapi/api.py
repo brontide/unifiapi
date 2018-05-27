@@ -86,7 +86,6 @@ class UnifiApiError(UnifiError):
                 self, "URL: {} status code {}".format(
                     out.url, out.status_code))
 
-
 class UnifiData(UserDict):
 
     def __init__(self, session, call, data):
@@ -114,6 +113,13 @@ class UnifiSiteData(UnifiData):
                 endpoint = '/'.join([self._client.endpoint, 'api/s', self.data['name']]))
         return self._site
 
+DATA_OVERRIDE = {
+    'api/self/sites': UnifiSiteData,
+}
+
+def data_factory(endpoint):
+    return DATA_OVERRIDE.get(endpoint, UnifiData)
+
 def imatch( x, y ):
     try:
         return x.lower() == y.lower()
@@ -124,12 +130,13 @@ def imatch( x, y ):
 class UnifiResponse(UserList):
     ''' Wrapper around Unifi api return values '''
 
-    def __init__(self, session, call, out, data_wrapper=UnifiData):
+    def __init__(self, session, call, out):
         ''' takes the Request out and breaks it down '''
 
         self._client = session
         self.endpoint = call
         self._out = out
+        data_wrapper = data_factory(call)
         try:
             self._orig = out.json()
             self.data = [ data_wrapper(session, call, x) for x in self._orig['data'] ]
@@ -231,8 +238,7 @@ class UnifiClientBase(object):
             method,
             endpoint,
             raise_on_error=True,
-            data_wrapper=UnifiData,
-            json=None,
+            args=None,
             stream=False,
             **params):
         '''
@@ -240,7 +246,7 @@ class UnifiClientBase(object):
         used with the partialmethod below to determine what kind of request we are
         making
         '''
-        if json and method == 'GET':
+        if params and method == 'GET':
             method = 'POST'
 
         url = '/'.join([self.endpoint, quote(endpoint)])
@@ -248,16 +254,16 @@ class UnifiClientBase(object):
         out = self._s.request(
             method,
             url,
-            json=json,
+            json=params,
             stream=stream,
-            params=params)
+            params=args)
         
         logger.debug("Results from %s status %i preview %s",
                      out.url, out.status_code, out.text[:20])
         if raise_on_error and out.status_code != requests.codes['ok']:
             raise UnifiApiError(out)
         try:
-            ret = UnifiResponse(self, endpoint, out, data_wrapper)
+            ret = UnifiResponse(self, endpoint, out)
             if raise_on_error and not ret.is_ok:
                 raise Exception()
         except:
@@ -272,102 +278,116 @@ class UnifiClientBase(object):
     put = partialmethod(request, 'PUT')
     delete = partialmethod(request, 'DELETE')
 
+
+def get_username_password(endpoint, username=None):
+    # Query for interactive credentials
+
+    # only works for ttys
+    if not sys.stdin.isatty():
+        logger.warning(
+            "Session not ready and no interactive credentials, this will probably fail")
+
+    if not username:
+        # if no username was supplied use the logged in username
+        username = getuser()
+    def_username = username
+    
+
+    # Start interactive login
+    print(
+        "Please enter credentials for Unifi {}\nUsername (CR={}): ".format(
+            endpoint,
+            username,
+        file=sys.stderr,
+        end=''))
+    username = input()
+
+    if username == "":
+        # User hit enter, use default
+        username = def_username
+    
+    password = getpass("{} Password : ".format(username), sys.stderr)
+
+    return username, password
+
+def controller(profile=None, endpoint=None, username=None, password=None, verify=None):
+    ''' Controller factory gived a profile or endpoint, username, password
+    will return a controller object.  If profile and endpoint are both None
+    the function will automatically try the default profile config '''
+    if not endpoint and not profile:
+        profile = 'default'
+
+    if profile:
+        # Load YAML profile details, verify and endpoint
+        # should go into **kwargs.  Username and password
+        # into self
+        profile_config = {}
+        for filename in ('unifiapi.yaml', os.path.expanduser('~/.unifiapi_yaml')):
+            try:
+                profile_config = yaml.safe_load(open(filename))[profile]
+                logger.debug('Found config for profile %s', profile)
+                break
+            except BaseException as e:
+                pass
+        endpoint = profile_config['endpoint']
+        if not username:
+            username = profile_config.get('username', None)
+        if not password:
+            password = profile_config.get('password', None)
+        if 'verify' in profile_config:
+            verify = profile_config.get('verify', None)
+        # Finished loading profile defaults
+    if verify is None:
+        verify = True
+    
+    if not username or not password:
+        # If we don't have full credentials, get them
+        username, password = get_username_password(endpoint, username)
+
+    logger.debug("Attempting to login to endpoint %s with username %s and verify %s", endpoint, username, repr(verify))
+
+    c = UnifiController(endpoint=endpoint)
+    resp = c.login(username, password)
+    return c
+
 class UnifiController(UnifiClientBase):
 
-    def __init__(self, *args, profile=None, username=None, password=None, **kwargs):
-        if not kwargs.get('endpoint', None):
-            # Presume if no endpoint set that we are
-            # loading the default profile
-            profile = 'default'
+    status = partialmethod(UnifiClientBase.request, 'GET', 'status')
+    admins = partialmethod(UnifiClientBase.request, 'GET', 'api/stat/admin')
+    logout = partialmethod(UnifiClientBase.request, 'GET', 'api/logout')
+    _sites = partialmethod(UnifiClientBase.request, 'GET', 'api/self/sites')
 
-        if profile:
-            # Load YAML profile details, verify and endpoint
-            # should go into **kwargs.  Username and password
-            # into self
-            profile_config = {}
-            for filename in ('unifiapi.yaml', os.path.expanduser('~/.unifiapi_yaml')):
-                try:
-                    profile_config = yaml.safe_load(open(filename))[profile]
-                    logger.debug('Found config for profile %s', profile)
-                    break
-                except BaseException as e:
-                    pass
-            kwargs['endpoint'] = profile_config['endpoint']
-            self.username = profile_config.get('username', None)
-            self.password = profile_config.get('password', None)
 
-        if username: self.username = username
-        if password: self.password = password
+    def __init__(self, *args, **kwargs):
 
         UnifiClientBase.__init__(self, *args, **kwargs)
+        status = self.status()
+        self.version = status.meta['server_version']
 
-        if self.username and self.password:
-            self.login(quiet=True)
+    def login(self, username=None, password=None, remember=True):
+        ret =  self.post('api/login', username=username, password=password, remember=remember)
+        self.sites = self._sites()
+        return ret
 
-    def _test_connection(self):
-        try:
-            out = self.get('status', raise_on_error=False)
-            self.server_version = out.meta['server_version']
-            logger.debug('Found server version %s at %s', self.server_version, self.endpoint)
-            if self.server_version not in KNOWN_GOOD_API_VERSIONS and  self.server_version not in WARNED_API:
-                logger.warning("API version %s has not been tested", self.server_version)
-                WARNED_API.append(self.server_version)
-            out = self.get('api/self',  raise_on_error=False)
-            name = out[0]['name']
-            if not self.username:
-                self.username = name
-            if name == self.username:
-                self.authenticated = True
-        except:
-            self.authenticated = False
+
+        # def _test_connection(self):
+        #     try:
+        #         out = self.get('status', raise_on_error=False)
+        #         self.server_version = out.meta['server_version']
+        #         logger.debug('Found server version %s at %s', self.server_version, self.endpoint)
+        #         if self.server_version not in KNOWN_GOOD_API_VERSIONS and  self.server_version not in WARNED_API:
+        #             logger.warning("API version %s has not been tested", self.server_version)
+        #             WARNED_API.append(self.server_version)
+        #         out = self.get('api/self',  raise_on_error=False)
+        #         name = out[0]['name']
+        #         if not self.username:
+        #             self.username = name
+        #         if name == self.username:
+        #             self.authenticated = True
+        #     except:
+        #         self.authenticated = False
+
     
-    def login(self, username=None, password=None, quiet=False):
-        if username: self.username = username
-        if password: self.password = password
-        if not self.username and not self.password and not quiet:
-            self.auth()
-        login_auth = {'username': self.username, 'password': self.password, 'remember': True}
-        out = self.post('api/login', json=login_auth)
-        self._test_connection()
-        if self.authenticated:
-            self.sites = self.get('api/self/sites',data_wrapper=UnifiSiteData)
-        else:
-            logger.warning("Login failure")
-
-    def logout(self):
-        ''' logout of a valid session / destroy cookie and 
-            authentication tokens '''
-        out = self.get('api/logout', x_add_site=False)
-        self._s.cookies.save(self._cookiejar_path,                                                  
-                             ignore_discard=True,                                                   
-                             ignore_expires=True)                       
-
-    def auth(self):
-        # Query for interactive credentials
-
-        # only works for ttys
-        if not sys.stdin.isatty():
-            logger.warning(
-                "Session not ready and no interactive credentials, this will probably fail")
-
-        # Start interactive login
-        print(
-            "Please enter credentials for Unifi {}\nUsername (CR={}): ".format(
-                self.endpoint,
-                getuser()),
-            file=sys.stderr,
-            end='')
-        username = input()
-        if username == "":
-            username = getuser()
-        password = getpass("{} Password : ".format(username), sys.stderr)
-
-        self.username = username
-        self.password = password
-
-    admins = partialmethod(UnifiClientBase.request, 'GET', 'api/stat/admin')
-
-
 class UnifiSite(UnifiClientBase): 
 
     def __init__(self,*args, **kwargs):
@@ -383,13 +403,13 @@ class UnifiSite(UnifiClientBase):
             if param not in params:
                 raise ValueError("{mgr}.{command} requires paramater {param}".format(**locals()))
         params['cmd'] = command
-        return self.post('/'.join(['cmd',mgr]), json=params)
+        return self.post('/'.join(['cmd',mgr]), params)
 
     def mac_by_type(self, unifi_type):
         return [ x['mac'] for x in self.devices_basic().by_type(unifi_type) ]
 
     def list_by_type(self, unifi_type):
-        return self.devices(json={'macs': self.mac_by_type(unifi_type)})
+        return self.devices(macs=self.mac_by_type(unifi_type))
 
     # Restful commands
     alerts          = partialmethod(UnifiClientBase.request, 'GET', 'rest/alarm')
