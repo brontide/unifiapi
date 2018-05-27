@@ -112,6 +112,15 @@ class UnifiSiteData(UnifiData):
         self._site = UnifiSite(session = self._client._s, 
                 endpoint = '/'.join([self._client.endpoint, 'api/s', self.data['name']]))
         return self._site
+    
+    def __call__(self):
+        return self.to_site()
+
+
+# For some responses we want to monkeypatch some of the calls to make
+# them easier to use, in this case being able to convert a list of sites
+# into a fisrt class site object
+#
 
 DATA_OVERRIDE = {
     'api/self/sites': UnifiSiteData,
@@ -120,7 +129,10 @@ DATA_OVERRIDE = {
 def data_factory(endpoint):
     return DATA_OVERRIDE.get(endpoint, UnifiData)
 
+
 def imatch( x, y ):
+    ''' case insensitive match which folds exceptions into
+    False for simplicity '''
     try:
         return x.lower() == y.lower()
     except:
