@@ -65,7 +65,12 @@ def multi_filter(input_dict, list_of_items=None, notfound_error=False):
                 ret[item] = input_dict[item]
     return ret
 
-quiet = requests.packages.urllib3.disable_warnings
+try:
+    quiet = requests.packages.urllib3.disable_warnings
+except:
+    def quiet():
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +152,7 @@ class UnifiResponse(UserList):
             self._orig = out.json()
             self.data = [ data_wrapper(session, call, x) for x in self._orig['data'] ]
         except:
-            raies
+            raise
 
         if 'count' in self.meta and len(self.data) != int(self.meta['count']):
             logger.warning("Truncated API response")
@@ -278,12 +283,12 @@ class UnifiClientBase(object):
         
         logger.debug("Results from %s status %i preview %s",
                      out.url, out.status_code, out.text[:20])
-        if raise_on_error and out.status_code != requests.codes.ok:
+        if raise_on_error and out.status_code != requests.codes['ok']:
             raise UnifiApiError(out)
         try:
             ret = UnifiResponse(self, endpoint, out, data_wrapper)
             if raise_on_error and not ret.is_ok:
-                raise
+                raise Exception()
         except:
             raise UnifiApiError(out)
 
