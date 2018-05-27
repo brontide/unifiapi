@@ -10,7 +10,7 @@ ALPHA API tool
   s = c.sites['default']()
   s.devices()
 
-For simple access please define a unifiapi.yaml file in the cwd or ~/.unifiapi_yaml with the following syntax::
+For simple access please define a unifiapi.yaml file in the cwd or ~/.unifiapi_yaml with the following syntax
 
   default:
     endpoint: 'https://unifi.mydomain.com'
