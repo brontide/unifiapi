@@ -31,7 +31,7 @@ Examples
 
 Change mss_clamp from disabled to auto
 
-.. code-block:: python
+.. code-block::
 
   >>> import unifiapi
   >>> # Get controller object
