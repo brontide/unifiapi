@@ -53,6 +53,12 @@ from copy import deepcopy
 from json import dumps
 from difflib import Differ
 import yaml
+import json
+import pkg_resources
+
+# FIXME: should be in data/
+DEVICES = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_devices.json')))
+DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')))
     
 def multi_filter(input_dict, list_of_items=None, notfound_error=False):
     ret = dict()
@@ -418,6 +424,11 @@ class UnifiSite(UnifiClientBase):
         params['cmd'] = command
         return self.post('/'.join(['cmd',mgr]), json=params)
 
+    def mac_by_type(self, unifi_type):
+        return [ x['mac'] for x in self.devices_basic().by_type(unifi_type) ]
+
+    def list_by_type(self, unifi_type):
+        return self.devices(json={'macs': self.mac_by_type(unifi_type)})
 
     # Restful commands
     alerts          = partialmethod(UnifiClientBase.request, 'GET', 'rest/alarm')
@@ -444,45 +455,35 @@ class UnifiSite(UnifiClientBase):
     radiusprofiles  = partialmethod(UnifiClientBase.request, 'GET', 'rest/radiusprofile')
     account         = partialmethod(UnifiClientBase.request, 'GET', 'rest/account')
 
-    archive_events      = partialmethod(_api_cmd, 'evtmgr', 'archive-all-alarms')
-    create_site         = partialmethod(_api_cmd, 'sitemgr', 'add-site', _req_params=['desc'])
-    delete_site         = partialmethod(_api_cmd, 'sitemgr', 'delete-site', _req_params=['name'])
-    update_site         = partialmethod(_api_cmd, 'sitemgr', 'update-site', _req_params=['desc'])
-    delete_device       = partialmethod(_api_cmd, 'sitemgr', 'delete-device', _req_params=['mac'])
-    move_device         = partialmethod(_api_cmd, 'sitemgr', 'move-device', _req_params=['mac', 'site_id'])
-    block_client        = partialmethod(_api_cmd, 'stamgr', 'block-sta', _req_params=['mac']) 
-    unblock_client      = partialmethod(_api_cmd, 'stamgr', 'unblock-sta', _req_params=['mac']) 
-    disconnect_client   = partialmethod(_api_cmd, 'stamgr', 'kick-sta', _req_params=['mac']) 
-    reboot              = partialmethod(_api_cmd, 'devmgr', 'reboot', _req_params=['mac']) 
-    poe_power_cycle     = partialmethod(_api_cmd, 'devmgr', 'power-cycle', _req_params=['mac', 'port_idx']) 
-    adopt               = partialmethod(_api_cmd, 'devmgr', 'adopt', _req_params=['mac']) 
-    speedtest           = partialmethod(_api_cmd, 'devmgr', 'speedtest') 
-    speedtest_status    = partialmethod(_api_cmd, 'devmgr', 'speedtest-status') 
-    set_locate          = partialmethod(_api_cmd, 'devmgr', 'set-locate', _req_params=['mac']) 
-    unset_locate        = partialmethod(_api_cmd, 'devmgr', 'unset-locate', _req_params=['mac']) 
-    upgrade             = partialmethod(_api_cmd, 'devmgr', 'upgrade', _req_params=['mac']) 
-    upgrade_external    = partialmethod(_api_cmd, 'devmgr', 'upgrade-external', _req_params=['mac', 'url']) 
-    spectrum_scan       = partialmethod(_api_cmd, 'devmgr', 'spectrum-scan', _req_params=['mac']) 
-    backups             = partialmethod(_api_cmd, 'backup', 'list-backups')
-    delete_backup       = partialmethod(_api_cmd, 'backup', 'delete-backup', _req_params=['filename'])
-    make_backup         = partialmethod(_api_cmd, 'system', 'backup')
+    c_archive_events      = partialmethod(_api_cmd, 'evtmgr', 'archive-all-alarms')
+    c_create_site         = partialmethod(_api_cmd, 'sitemgr', 'add-site', _req_params=['desc'])
+    c_delete_site         = partialmethod(_api_cmd, 'sitemgr', 'delete-site', _req_params=['name'])
+    c_update_site         = partialmethod(_api_cmd, 'sitemgr', 'update-site', _req_params=['desc'])
+    c_delete_device       = partialmethod(_api_cmd, 'sitemgr', 'delete-device', _req_params=['mac'])
+    c_move_device         = partialmethod(_api_cmd, 'sitemgr', 'move-device', _req_params=['mac', 'site_id'])
+    c_block_client        = partialmethod(_api_cmd, 'stamgr', 'block-sta', _req_params=['mac']) 
+    c_unblock_client      = partialmethod(_api_cmd, 'stamgr', 'unblock-sta', _req_params=['mac']) 
+    c_disconnect_client   = partialmethod(_api_cmd, 'stamgr', 'kick-sta', _req_params=['mac']) 
+    c_reboot              = partialmethod(_api_cmd, 'devmgr', 'reboot', _req_params=['mac']) 
+    c_poe_power_cycle     = partialmethod(_api_cmd, 'devmgr', 'power-cycle', _req_params=['mac', 'port_idx']) 
+    c_adopt               = partialmethod(_api_cmd, 'devmgr', 'adopt', _req_params=['mac']) 
+    c_speedtest           = partialmethod(_api_cmd, 'devmgr', 'speedtest') 
+    c_speedtest_status    = partialmethod(_api_cmd, 'devmgr', 'speedtest-status') 
+    c_set_locate          = partialmethod(_api_cmd, 'devmgr', 'set-locate', _req_params=['mac']) 
+    c_unset_locate        = partialmethod(_api_cmd, 'devmgr', 'unset-locate', _req_params=['mac']) 
+    c_upgrade             = partialmethod(_api_cmd, 'devmgr', 'upgrade', _req_params=['mac']) 
+    c_upgrade_external    = partialmethod(_api_cmd, 'devmgr', 'upgrade-external', _req_params=['mac', 'url']) 
+    c_spectrum_scan       = partialmethod(_api_cmd, 'devmgr', 'spectrum-scan', _req_params=['mac']) 
+    c_backups             = partialmethod(_api_cmd, 'backup', 'list-backups')
+    c_delete_backup       = partialmethod(_api_cmd, 'backup', 'delete-backup', _req_params=['filename'])
+    c_make_backup         = partialmethod(_api_cmd, 'system', 'backup')
 
-    def mac_by_type(self, unifi_type):
-        return [ x['mac'] for x in self.devices_basic().by_type(unifi_type) ]
 
-    ugw_macs = partialmethod(mac_by_type, 'ugw')
-    usw_macs = partialmethod(mac_by_type, 'usw')
-    uap_macs = partialmethod(mac_by_type, 'uap')
-
-    def list_ugw(self):
-        return self.devices(json={'macs': self.ugw_macs()})
-
-    def list_usw(self):
-        return self.devices(json={'macs': self.usw_macs()})
-
-    def list_uap(self):
-        return self.devices(json={'macs': self.uap_macs()})
-
+''' A little python magic to automatically add device_macs and list_device for all known device 
+types into the UnifiSite object '''
+for dev_id in set(( x['type'] for x in DEVICES.values())):
+    setattr(UnifiSite, "{}_macs".format(dev_id), partialmethod(UnifiSite.mac_by_type, dev_id) )
+    setattr(UnifiSite, "list_{}".format(dev_id), partialmethod(UnifiSite.list_by_type, dev_id) )
 
 
 
