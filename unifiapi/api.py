@@ -49,10 +49,6 @@ from json import dumps
 import yaml
 import json
 import pkg_resources
-
-# FIXME: should be in data/
-DEVICES = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_devices.json')))
-DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')))
     
 try:
     quiet = requests.packages.urllib3.disable_warnings
@@ -63,11 +59,81 @@ except:
 
 logger = logging.getLogger(__name__)
 
-KNOWN_GOOD_API_VERSIONS = [ 
-        '5.7.23',
-        ]
+# FIXME: should be in data/
+DEVICES = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_devices.json')))
+DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')))
 
-WARNED_API = []
+def get_username_password(endpoint, username=None):
+    # Query for interactive credentials
+
+    # only works for ttys
+    if not sys.stdin.isatty():
+        logger.warning(
+            "Session not ready and no interactive credentials, this will probably fail")
+
+    if not username:
+        # if no username was supplied use the logged in username
+        username = getuser()
+    def_username = username
+    
+
+    # Start interactive login
+    print(
+        "Please enter credentials for Unifi {}\nUsername (CR={}): ".format(
+            endpoint,
+            username,
+        file=sys.stderr,
+        end=''))
+    username = input()
+
+    if username == "":
+        # User hit enter, use default
+        username = def_username
+    
+    password = getpass("{} Password : ".format(username), sys.stderr)
+
+    return username, password
+
+def controller(profile=None, endpoint=None, username=None, password=None, verify=None):
+    ''' Controller factory gived a profile or endpoint, username, password
+    will return a controller object.  If profile and endpoint are both None
+    the function will automatically try the default profile config '''
+    if not endpoint and not profile:
+        profile = 'default'
+
+    if profile:
+        # Load YAML profile details, verify and endpoint
+        # should go into **kwargs.  Username and password
+        # into self
+        profile_config = {}
+        for filename in ('unifiapi.yaml', os.path.expanduser('~/.unifiapi_yaml')):
+            try:
+                profile_config = yaml.safe_load(open(filename))[profile]
+                logger.debug('Found config for profile %s', profile)
+                break
+            except BaseException as e:
+                pass
+        endpoint = profile_config['endpoint']
+        if not username:
+            username = profile_config.get('username', None)
+        if not password:
+            password = profile_config.get('password', None)
+        if 'verify' in profile_config:
+            verify = profile_config.get('verify', None)
+        # Finished loading profile defaults
+    if verify is None:
+        verify = True
+    
+    if not username or not password:
+        # If we don't have full credentials, get them
+        username, password = get_username_password(endpoint, username)
+
+    logger.debug("Attempting to login to endpoint %s with username %s and verify %s", endpoint, username, repr(verify))
+
+    c = UnifiController(endpoint=endpoint)
+    resp = c.login(username, password)
+    return c
+
 
 class UnifiError(Exception):
     pass
@@ -139,6 +205,8 @@ def imatch( x, y ):
         pass
     return False
 
+
+
 class UnifiResponse(UserList):
     ''' Wrapper around Unifi api return values '''
 
@@ -179,6 +247,7 @@ class UnifiResponse(UserList):
 
         
     def __getitem__(self, key):
+        ''' Try to act as both list and dict where possible '''
         if isinstance(key, int):
             return self.data[key]
         for keying in [ 'key', 'name', 'mac' ]:
@@ -291,76 +360,6 @@ class UnifiClientBase(object):
     delete = partialmethod(request, 'DELETE')
 
 
-def get_username_password(endpoint, username=None):
-    # Query for interactive credentials
-
-    # only works for ttys
-    if not sys.stdin.isatty():
-        logger.warning(
-            "Session not ready and no interactive credentials, this will probably fail")
-
-    if not username:
-        # if no username was supplied use the logged in username
-        username = getuser()
-    def_username = username
-    
-
-    # Start interactive login
-    print(
-        "Please enter credentials for Unifi {}\nUsername (CR={}): ".format(
-            endpoint,
-            username,
-        file=sys.stderr,
-        end=''))
-    username = input()
-
-    if username == "":
-        # User hit enter, use default
-        username = def_username
-    
-    password = getpass("{} Password : ".format(username), sys.stderr)
-
-    return username, password
-
-def controller(profile=None, endpoint=None, username=None, password=None, verify=None):
-    ''' Controller factory gived a profile or endpoint, username, password
-    will return a controller object.  If profile and endpoint are both None
-    the function will automatically try the default profile config '''
-    if not endpoint and not profile:
-        profile = 'default'
-
-    if profile:
-        # Load YAML profile details, verify and endpoint
-        # should go into **kwargs.  Username and password
-        # into self
-        profile_config = {}
-        for filename in ('unifiapi.yaml', os.path.expanduser('~/.unifiapi_yaml')):
-            try:
-                profile_config = yaml.safe_load(open(filename))[profile]
-                logger.debug('Found config for profile %s', profile)
-                break
-            except BaseException as e:
-                pass
-        endpoint = profile_config['endpoint']
-        if not username:
-            username = profile_config.get('username', None)
-        if not password:
-            password = profile_config.get('password', None)
-        if 'verify' in profile_config:
-            verify = profile_config.get('verify', None)
-        # Finished loading profile defaults
-    if verify is None:
-        verify = True
-    
-    if not username or not password:
-        # If we don't have full credentials, get them
-        username, password = get_username_password(endpoint, username)
-
-    logger.debug("Attempting to login to endpoint %s with username %s and verify %s", endpoint, username, repr(verify))
-
-    c = UnifiController(endpoint=endpoint)
-    resp = c.login(username, password)
-    return c
 
 class UnifiController(UnifiClientBase):
 
