@@ -40,18 +40,12 @@ install_aliases()
 import requests
 import logging
 from getpass import getpass, getuser
-import sys
-from http.cookiejar import LWPCookieJar as fcj
 import os
-from functools import partial
-from datetime import datetime
+import sys
 from urllib.parse import urlparse,quote
 import time
-from tarfile import filemode
 from collections import UserList, UserDict
-from copy import deepcopy
 from json import dumps
-from difflib import Differ
 import yaml
 import json
 import pkg_resources
@@ -60,17 +54,6 @@ import pkg_resources
 DEVICES = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_devices.json')))
 DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')))
     
-def multi_filter(input_dict, list_of_items=None, notfound_error=False):
-    ret = dict()
-    if notfound_error:
-        for item in list_of_items:
-            ret[item] = input_dict[item]
-    else:
-        for item in list_of_items:
-            if item in input_dict:
-                ret[item] = input_dict[item]
-    return ret
-
 try:
     quiet = requests.packages.urllib3.disable_warnings
 except:
@@ -109,8 +92,7 @@ class UnifiData(UserDict):
     def __init__(self, session, call, data):
 
         self._client = session
-        self.data = deepcopy(data)
-        self.orig = deepcopy(data)
+        self.data = data
         if not '_id' in data:
             self._path = None
         elif 'key' in data:
@@ -121,12 +103,6 @@ class UnifiData(UserDict):
     @property
     def endpoint(self):
         return self._path
-
-    def diff(self):
-        origs = dumps(self.orig, sort_keys=True, indent=4, separators=(',', ': '))
-        datas = dumps(self.data, sort_keys=True, indent=4, separators=(',', ': '))
-        d = Differ()
-        return d.compare(origs,datas)
 
 class UnifiSiteData(UnifiData):
 
@@ -237,19 +213,8 @@ class UnifiClientBase(object):
             verify=True):
 
         if not session:
-            self._cookiejar_path = os.path.expanduser('~/.unifiapi_cookiejar')
             self._s = requests.Session()
             self._s.headers['User-Agent'] = 'unifiapi library based on requests'
-            self._s.cookies = fcj()
-            try:
-                self._s.cookies.load(
-                    self._cookiejar_path,
-                    ignore_discard=True,
-                    ignore_expires=True)
-            except BaseException:
-                logger.warning(
-                    "Could not load cookies from %s",
-                    self._cookiejar_path)
         else:
             self._s = session
 
@@ -354,7 +319,6 @@ class UnifiController(UnifiClientBase):
             if name == self.username:
                 self.authenticated = True
         except:
-            #raise
             self.authenticated = False
     
     def login(self, username=None, password=None, quiet=False):
@@ -366,9 +330,6 @@ class UnifiController(UnifiClientBase):
         out = self.post('api/login', json=login_auth)
         self._test_connection()
         if self.authenticated:
-            self._s.cookies.save(self._cookiejar_path,                                                  
-                                 ignore_discard=True,                                                   
-                                 ignore_expires=True)                       
             self.sites = self.get('api/self/sites',data_wrapper=UnifiSiteData)
         else:
             logger.warning("Login failure")

@@ -10,3 +10,6 @@ compiled python modules.
 
 # Config file
 unifiapi.yaml
+
+launch.json
+settings.json
