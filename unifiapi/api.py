@@ -478,6 +478,7 @@ class UnifiSite(UnifiClientBase):
     c_backups             = partialmethod(_api_cmd, 'backup', 'list-backups')
     c_delete_backup       = partialmethod(_api_cmd, 'backup', 'delete-backup', _req_params=['filename'])
     c_make_backup         = partialmethod(_api_cmd, 'system', 'backup')
+    c_check_firmware      = partialmethod(_api_cmd, 'system', 'check-firmware-update')
 
 
 ''' A little python magic to automatically add device_macs and list_device for all known device 
