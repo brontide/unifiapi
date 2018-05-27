@@ -62,9 +62,26 @@ def quiet():
 
 logger = logging.getLogger(__name__)
 
+def jsonKeys2int(x):
+    if isinstance(x, dict):
+            try:
+                return {int(k):v for k,v in x.items()}
+            except:
+                pass
+    return x
+
+def cat_app_to_dpi(cat, app):
+    ''' convert numeric category and app codes to dpi_id for
+        lookup in the application list '''
+    return int(cat)<<16+int(app)
+
+def dpi_to_cat_app(dpi_id):
+    ''' convert dpi_id to category and app codes '''
+    return int(dpi_id)>>16, int(dpi_id)&65536
+
 # FIXME: should be in data/
 DEVICES = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_devices.json')))
-DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')))
+DPI = json.load(open(pkg_resources.resource_filename('unifiapi','unifi_dpi.json')), object_hook=jsonKeys2int)
 
 def get_username_password(endpoint, username=None):
     # Query for interactive credentials
@@ -255,9 +272,6 @@ class UnifiResponse(UserList):
                 foo = self.filter_by(keying, key, unwrap=True)
                 if foo: return foo
         raise KeyError("{} not found".format(key))
-
-    def __repr__(self):
-        return "Unifi Response {}: data {} meta {}".format(self.endpoint, len(self.data), self.meta)
 
     @property
     def meta(self):
