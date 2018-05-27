@@ -1,7 +1,15 @@
 Unifi API library and cli tool
 ================================
 
-ALPHA API tool.  This is still very perliminary and much documentation has yet to be written.  Examples will follow.
+ALPHA API tool.  This is still very perliminary and much documentation has yet to be written.  This is written for
+python 3 but I will make every attempt to keep it working under python 2.
+
+At the heart of this are some very simple RESTful wrappers.  The UnifiClient base implements get, put, post, and delete calls
+while adding whatever prefix they were started with.  The controller has no prefix and the site has api/s/{sitename}.  The
+return values from the API are wrapped to preseve fidelety of the data and meta.  The response object is a UserList so it acts
+like a list most of the time but has additional properties.  It can be indexed with strings and it will try to do the right 
+thing ( see sites['default'] in examples ).  There is a meta property which has the full meta returned by the server.
+
 
 .. code-block:: python
 
