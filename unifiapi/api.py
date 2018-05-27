@@ -128,7 +128,7 @@ def controller(profile=None, endpoint=None, username=None, password=None, verify
                 profile_config = yaml.safe_load(open(filename))[profile]
                 logger.debug('Found config for profile %s', profile)
                 break
-            except BaseException as e:
+            except:
                 pass
         endpoint = profile_config['endpoint']
         if not username:
@@ -148,7 +148,7 @@ def controller(profile=None, endpoint=None, username=None, password=None, verify
     logger.debug("Attempting to login to endpoint %s with username %s and verify %s", endpoint, username, repr(verify))
 
     c = UnifiController(endpoint=endpoint, verify=verify)
-    resp = c.login(username, password)
+    c.login(username, password)
     return c
 
 
