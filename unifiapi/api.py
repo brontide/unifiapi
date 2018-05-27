@@ -50,10 +50,13 @@ import yaml
 import json
 import pkg_resources
     
-try:
-    quiet = requests.packages.urllib3.disable_warnings
-except:
-    def quiet():
+def quiet():
+    ''' This function turns off InsecureRequestWarnings '''
+    try:
+        # old vendored packages
+        requests.packages.urllib3.disable_warnings() #pylint: disable=E1101
+    except:
+        # New way
         import urllib3
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -173,7 +176,7 @@ class UnifiSiteData(UnifiData):
 
     def to_site(self):
         try:
-            return self._site
+            return self._site #pylint: disable=E0203
         except: pass
         self._site = UnifiSite(session = self._client._s, 
                 endpoint = '/'.join([self._client.endpoint, 'api/s', self.data['name']]))
