@@ -394,7 +394,7 @@ class UnifiSite(UnifiClientBase):
             if param not in params:
                 raise ValueError("{mgr}.{command} requires paramater {param}".format(**locals()))
         params['cmd'] = command
-        return self.post('/'.join(['cmd',mgr]), params)
+        return self.post('/'.join(['cmd',mgr]), **params)
 
     def mac_by_type(self, unifi_type):
         return [ x['mac'] for x in self.devices_basic().by_type(unifi_type) ]
