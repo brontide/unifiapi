@@ -199,6 +199,20 @@ class UnifiSiteData(UnifiData):
     def __call__(self):
         return self.to_site()
 
+class UnifiAutoBackupData(UnifiData):
+
+    def download(self):
+        ''' download the backup referenced by the current record
+        Unifi doesn't make this easy since it's relative to the
+        controller and not the site '''
+        p = urlparse(self._client.endpoint)
+        url = '{}://{}/dl/autobackup/{}'.format(p.scheme,p.netloc,self.data['filename'])
+        r = self._client._s.get(url, stream=True)
+        return r.raw
+
+    def delete(self):
+        ''' Delete the referenced backup file '''
+        return self._client.c_delete_backup(self.data['filename'])
 
 # For some responses we want to monkeypatch some of the calls to make
 # them easier to use, in this case being able to convert a list of sites
@@ -207,6 +221,7 @@ class UnifiSiteData(UnifiData):
 
 DATA_OVERRIDE = {
     'api/self/sites': UnifiSiteData,
+    'cmd/backup': UnifiAutoBackupData,
 }
 
 def data_factory(endpoint):
