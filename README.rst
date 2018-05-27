@@ -74,4 +74,12 @@ List backups
   2018-05-26T00:00:00Z autobackup_5.7.23_20180526_0000_1527292800011.unf 27546816
   2018-05-27T00:00:00Z autobackup_5.7.23_20180527_0000_1527379200013.unf 28005568
 
-  
+Show the temperatures of all units with sensors
+
+.. code-block::
+
+  >>> devs = s.devices()
+  >>> for item in devs.filter_by('has_temperature', True):
+  ...     print('{ip} - {general_temperature}C'.format(**item))
+  ...
+  10.11.10.6 - 58C
