@@ -81,13 +81,10 @@ def get_username_password(endpoint, username=None):
     
 
     # Start interactive login
-    print(
+    username  = input(
         "Please enter credentials for Unifi {}\nUsername (CR={}): ".format(
             endpoint,
-            username,
-        file=sys.stderr,
-        end=''))
-    username = input()
+            username))
 
     if username == "":
         # User hit enter, use default
@@ -133,7 +130,7 @@ def controller(profile=None, endpoint=None, username=None, password=None, verify
 
     logger.debug("Attempting to login to endpoint %s with username %s and verify %s", endpoint, username, repr(verify))
 
-    c = UnifiController(endpoint=endpoint)
+    c = UnifiController(endpoint=endpoint, verify=verify)
     resp = c.login(username, password)
     return c
 
