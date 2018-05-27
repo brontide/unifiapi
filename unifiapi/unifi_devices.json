@@ -1,0 +1,993 @@
+{
+  "BZ2": {
+    "name": "UniFi AP",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 23,
+        "gain": 5
+      }
+    }
+  },
+  "BZ2LR": {
+    "name": "UniFi AP-LR",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 28,
+        "gain": 3
+      }
+    }
+  },
+  "U2HSR": {
+    "name": "UniFi AP-Outdoor+",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 30,
+        "gain": 5
+      }
+    }
+  },
+  "U2IW": {
+    "name": "UniFi AP-In Wall",
+    "type": "uap",
+    "hybrid": "uap+usw",
+    "features": {
+      "zh": true
+    },
+    "ports": {
+      "standard": 2
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 18,
+        "gain": 1
+      }
+    }
+  },
+  "U2L48": {
+    "name": "UniFi AP-LR",
+    "type": "uap",
+    "radios": {
+      "ng": {
+        "maxPower": 29,
+        "gain": 0
+      }
+    }
+  },
+  "U2Lv2": {
+    "name": "UniFi AP-LR v2",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 28,
+        "gain": 3
+      }
+    }
+  },
+  "U2M": {
+    "name": "UniFi AP-Mini",
+    "type": "uap",
+    "radios": {
+      "ng": {
+        "maxPower": 18,
+        "gain": 0
+      }
+    }
+  },
+  "U2O": {
+    "name": "UniFi AP-Outdoor",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 28,
+        "gain": 6
+      }
+    }
+  },
+  "U2S48": {
+    "name": "UniFi AP",
+    "type": "uap",
+    "radios": {
+      "ng": {
+        "maxPower": 23,
+        "gain": 0
+      }
+    }
+  },
+  "U2Sv2": {
+    "name": "UniFi AP v2",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "ng": {
+        "maxPower": 23,
+        "gain": 0
+      }
+    }
+  },
+  "U5O": {
+    "name": "UniFi AP-Outdoor 5G",
+    "type": "uap",
+    "features": {
+      "dfs": true,
+      "zh": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 27,
+        "gain": 6
+      }
+    }
+  },
+  "U7E": {
+    "name": "UniFi AP-AC",
+    "type": "uap",
+    "features": {
+      "ac": true,
+      "brcm": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 24,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 4
+      }
+    }
+  },
+  "U7EDU": {
+    "name": "UniFi AP-AC-EDU",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 22,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 3
+      }
+    }
+  },
+  "U7Ev2": {
+    "name": "UniFi AP-AC v2",
+    "type": "uap",
+    "features": {
+      "ac": true,
+      "brcm": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 24,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 4
+      }
+    }
+  },
+  "U7HD": {
+    "name": "UniFi AP-HD",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 25,
+        "gain": 3
+      }
+    }
+  },
+  "U7SHD": {
+    "name": "UniFi AP-SHD",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true,
+      "airTime": true,
+      "airView": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 8
+      },
+      "ng": {
+        "maxPower": 25,
+        "gain": 6
+      }
+    }
+  },
+  "U7NHD": {
+    "name": "UniFi AP-nanoHD",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 20,
+        "gain": 3
+      }
+    },
+    "beta": "<=5.6"
+  },
+  "UCXG": {
+    "name": "UniFi AP-XG",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 8
+      },
+      "ng": {
+        "maxPower": 25,
+        "gain": 6
+      }
+    }
+  },
+  "UXSDM": {
+    "name": "UniFi AP-BaseStationXG",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 10
+      }
+    }
+  },
+  "UCMSH": {
+    "name": "UniFi AP-MeshXG",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 25,
+        "gain": 15
+      },
+      "ng": {
+        "maxPower": 25,
+        "gain": 15
+      }
+    }
+  },
+  "U7IW": {
+    "name": "UniFi AP-AC-In Wall",
+    "type": "uap",
+    "hybrid": "uap+usw",
+    "ports": {
+      "standard": 2
+    },
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 20,
+        "gain": 1
+      },
+      "ng": {
+        "maxPower": 20,
+        "gain": 2
+      }
+    }
+  },
+  "U7IWP": {
+    "name": "UniFi AP-AC-In Wall Pro",
+    "type": "uap",
+    "hybrid": "uap+usw",
+    "ports": {
+      "standard": 2
+    },
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 22,
+        "gain": 6
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 5
+      }
+    }
+  },
+  "U7MP": {
+    "name": "UniFi AP-AC-Mesh-Pro",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 22,
+        "gain": 8
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 8
+      }
+    }
+  },
+  "U7LR": {
+    "name": "UniFi AP-AC-LR",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 22,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 24,
+        "gain": 3
+      }
+    }
+  },
+  "U7LT": {
+    "name": "UniFi AP-AC-Lite",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 20,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 20,
+        "gain": 3
+      }
+    }
+  },
+  "U7O": {
+    "name": "UniFi AP-AC Outdoor",
+    "type": "uap",
+    "features": {
+      "ac": true,
+      "brcm": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 24,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 4
+      }
+    }
+  },
+  "U7P": {
+    "name": "UniFi AP-Pro",
+    "type": "uap",
+    "features": {
+      "dfs": true,
+      "bandsteer": true,
+      "zh": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 23,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 30,
+        "gain": 5
+      }
+    }
+  },
+  "U7MSH": {
+    "name": "UniFi AP-AC-Mesh",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 20,
+        "gain": 4
+      },
+      "ng": {
+        "maxPower": 20,
+        "gain": 3
+      }
+    }
+  },
+  "U7PG2": {
+    "name": "UniFi AP-AC-Pro",
+    "type": "uap",
+    "features": {
+      "gen": 2,
+      "ac": true,
+      "bandsteer": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 23,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 3
+      }
+    }
+  },
+  "p2N": {
+    "name": "PicoStation M2",
+    "type": "uap",
+    "features": {
+      "zh": true
+    },
+    "radios": {
+      "na": {
+        "maxPower": 22,
+        "gain": 3
+      },
+      "ng": {
+        "maxPower": 22,
+        "gain": 3
+      }
+    }
+  },
+  "US8": {
+    "name": "UniFi Switch 8",
+    "type": "usw",
+    "features": {
+      "poe": true
+    },
+    "ports": {
+      "standard": 8
+    },
+    "power": {
+      "capacity": 10
+    }
+  },
+  "US8P60": {
+    "name": "UniFi Switch 8 POE-60W",
+    "type": "usw",
+    "features": {
+      "poe": true
+    },
+    "ports": {
+      "standard": 8
+    },
+    "power": {
+      "capacity": 60
+    }
+  },
+  "US8P150": {
+    "name": "UniFi Switch 8 POE-150W",
+    "type": "usw",
+    "features": {
+      "poe": true
+    },
+    "ports": {
+      "standard": 8,
+      "sfp": [
+        9,
+        10
+      ]
+    },
+    "power": {
+      "capacity": 150
+    }
+  },
+  "S28150": {
+    "name": "UniFi Switch 8 AT-150W",
+    "type": "usw",
+    "features": {
+      "poe": true
+    },
+    "ports": {
+      "standard": 8,
+      "sfp": [
+        9,
+        10
+      ]
+    },
+    "power": {
+      "capacity": 150
+    }
+  },
+  "USC8": {
+    "name": "UniFi Switch 8",
+    "type": "usw",
+    "features": {
+      "poe": true
+    },
+    "ports": {
+      "standard": 8
+    },
+    "power": {
+      "capacity": 10
+    },
+    "beta": "<=5.8"
+  },
+  "US16P150": {
+    "name": "UniFi Switch 16 POE-150W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "simple"
+    },
+    "ports": {
+      "standard": 16,
+      "sfp": [
+        17,
+        18
+      ]
+    },
+    "power": {
+      "capacity": 150
+    }
+  },
+  "S216150": {
+    "name": "UniFi Switch 16 AT-150W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "simple"
+    },
+    "ports": {
+      "standard": 16,
+      "sfp": [
+        17,
+        18
+      ]
+    },
+    "power": {
+      "capacity": 150
+    }
+  },
+  "US24": {
+    "name": "UniFi Switch 24",
+    "type": "usw",
+    "features": {
+      "fan": "simple"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    }
+  },
+  "US24P250": {
+    "name": "UniFi Switch 24 POE-250W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    },
+    "power": {
+      "capacity": 250
+    }
+  },
+  "US24PL2": {
+    "name": "UniFi Switch 24 L2 POE",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    }
+  },
+  "US24P500": {
+    "name": "UniFi Switch 24 POE-500W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    },
+    "power": {
+      "capacity": 500
+    }
+  },
+  "S224250": {
+    "name": "UniFi Switch 24 AT-250W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    },
+    "power": {
+      "capacity": 250
+    }
+  },
+  "S224500": {
+    "name": "UniFi Switch 24 AT-500W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 24,
+      "sfp": [
+        25,
+        26
+      ]
+    },
+    "power": {
+      "capacity": 500
+    }
+  },
+  "US48": {
+    "name": "UniFi Switch 48",
+    "type": "usw",
+    "features": {
+      "fan": "simple"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    }
+  },
+  "US48P500": {
+    "name": "UniFi Switch 48 POE-500W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    },
+    "power": {
+      "capacity": 500
+    }
+  },
+  "US48PL2": {
+    "name": "UniFi Switch 48 L2 POE",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    }
+  },
+  "US48P750": {
+    "name": "UniFi Switch 48 POE-750W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    },
+    "power": {
+      "capacity": 750
+    }
+  },
+  "S248500": {
+    "name": "UniFi Switch 48 AT-500W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    },
+    "power": {
+      "capacity": 500
+    }
+  },
+  "S248750": {
+    "name": "UniFi Switch 48 AT-750W",
+    "type": "usw",
+    "features": {
+      "poe": true,
+      "fan": "alwayson"
+    },
+    "ports": {
+      "standard": 48,
+      "sfp": [
+        51,
+        52
+      ],
+      "plus": [
+        49,
+        50
+      ]
+    },
+    "power": {
+      "capacity": 750
+    }
+  },
+  "US6XG150": {
+    "name": "UniFi Switch 6XG POE-150W",
+    "type": "usw",
+    "ports": {
+      "standard": "1-4",
+      "plus": "5-6"
+    },
+    "diagram": [
+      "01 02 03 04 __ 05 06"
+    ]
+  },
+  "USXG": {
+    "name": "UniFi Switch 16XG",
+    "type": "usw",
+    "ports": {
+      "plus": "1-12",
+      "standard": "13-16"
+    },
+    "diagram": [
+      "01 03 05 07 09 11 __ __ __ __ __",
+      "02 04 06 08 10 12 __ 13 14 15 16"
+    ]
+  },
+  "UGW3": {
+    "name": "UniFi Security Gateway 3P",
+    "type": "ugw",
+    "ports": [
+      "wan",
+      "lan",
+      "lan2"
+    ],
+    "remap": {
+      "lan2": {
+        "to": "wan2",
+        "pref": "ugw3_wan2_enabled"
+      }
+    }
+  },
+  "UGW4": {
+    "name": "UniFi Security Gateway 4P",
+    "type": "ugw",
+    "ports": [
+      "lan",
+      "lan2",
+      "wan",
+      "wan2"
+    ],
+    "temperatureSensors": [
+      {
+        "sensor": "PHY",
+        "maxTemp": 105
+      },
+      {
+        "sensor": "CPU",
+        "maxTemp": 100
+      },
+      {
+        "sensor": "Board (PHY)"
+      },
+      {
+        "sensor": "Board (CPU)"
+      }
+    ]
+  },
+  "UGWHD4": {
+    "name": "UniFi Security Gateway HD",
+    "type": "ugw",
+    "ports": [
+      "eth0",
+      "eth1",
+      "eth2",
+      "eth3"
+    ],
+    "diagram": [
+      "00 01 02 03"
+    ],
+    "features": {
+      "portTableHasTypes": true,
+      "networkInterfaceCount": 4
+    }
+  },
+  "UGWXG": {
+    "name": "UniFi Security Gateway XG-8",
+    "type": "ugw",
+    "ports": [
+      "eth0",
+      "eth1",
+      "eth2",
+      "eth3",
+      "eth4",
+      "eth5",
+      "eth6",
+      "eth7",
+      "eth8"
+    ],
+    "diagram": [
+      "01 03 05 07 __",
+      "02 04 06 08 00"
+    ],
+    "features": {
+      "sfpPlusSupported": true,
+      "portTableHasTypes": true,
+      "networkInterfaceCount": 7
+    },
+    "temperatureSensors": [
+      {
+        "sensor": "Board 1"
+      },
+      {
+        "sensor": "Board 2"
+      },
+      {
+        "sensor": "CPU",
+        "maxTemp": 95
+      },
+      {
+        "sensor": "PHY 1",
+        "maxTemp": 100
+      },
+      {
+        "sensor": "PHY 2",
+        "maxTemp": 100
+      }
+    ]
+  },
+  "UP4": {
+    "name": "UniFi Phone-X",
+    "type": "uph"
+  },
+  "UP5": {
+    "name": "UniFi Phone",
+    "type": "uph"
+  },
+  "UP5t": {
+    "name": "UniFi Phone-Pro",
+    "type": "uph"
+  },
+  "UP7": {
+    "name": "UniFi Phone-Executive",
+    "type": "uph"
+  },
+  "UP5c": {
+    "name": "UniFi Phone",
+    "type": "uph"
+  },
+  "UP5tc": {
+    "name": "UniFi Phone-Pro",
+    "type": "uph"
+  },
+  "UP7c": {
+    "name": "UniFi Phone-Executive",
+    "type": "uph"
+  }
+}
