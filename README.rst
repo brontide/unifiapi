@@ -43,8 +43,7 @@ Change mss_clamp from disabled to auto
   >>> s = c2.sites['default']()
   >>> settings = s.settings()
   >>> settings['usg']
-  {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True,
-'mdns_enabled': True, 'mss_clamp': 'disabled', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
+  {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'disabled', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
   >>> settings['usg']['mss_clamp'] = 'auto'
   >>> settings['usg'].endpoint
   'rest/setting/usg/5ad52945be0777002184bc4a'
@@ -53,7 +52,5 @@ Change mss_clamp from disabled to auto
   Unifi Response rest/setting/usg/5ad52945be0777002184bc4a: data 1 meta {'rc': 'ok'}
   >>> settings = s.settings()
   >>> settings['usg']
-  {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True,
-'mdns_enabled': True, 'mss_clamp': 'auto', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False,
-'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
+  {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'auto', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
   
