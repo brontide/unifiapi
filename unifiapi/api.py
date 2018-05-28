@@ -73,7 +73,7 @@ def jsonKeys2int(x):
 def cat_app_to_dpi(cat, app):
     ''' convert numeric category and app codes to dpi_id for
         lookup in the application list '''
-    return int(cat)<<16+int(app)
+    return (int(cat)<<16)+int(app)
 
 def dpi_to_cat_app(dpi_id):
     ''' convert dpi_id to category and app codes '''
