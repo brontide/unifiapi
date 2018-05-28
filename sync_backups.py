@@ -3,7 +3,10 @@
 import unifiapi
 from pathlib import Path
 
+# MODIFY
 dest_dir = Path('/enterpoop/backups/unifi')
+delete_backups = False
+
 
 print("Logging into controller")
 c = unifiapi.controller()
@@ -18,7 +21,13 @@ for backup in backups:
         if stat.st_size != int(backup['size']):
             print(f"{full_file} DOES NOT MATCH FILESIZE")
         else:
-            print(f"{full_file} exists")
+            print(f"{full_file} exists and is the right size")
+            if delete_backups:
+                backup.delete()
     else:
         print("Copying {} to {}".format(backup['filename'], full_file))
-        full_file.write_bytes(backup.download().read())
+        try:
+            full_file.write_bytes(backup.download().read())
+        except:
+            # Oops, delete file that could be only partly complete
+            full_file.unlink()
