@@ -191,6 +191,15 @@ class UnifiData(UserDict):
     def endpoint(self):
         return self._path
 
+class UnifiDeviceData(UnifiData):
+
+    def __init__(self, *args, **kwargs):
+        UnifiData.__init__(self, *args, **kwargs)
+        # For devices the update path is very different from the GET path so
+        # rewrite it here
+        parts = self._path.split('/')
+        self._path = '/'.join(['rest', 'device', parts[-1]])
+
 class UnifiSiteData(UnifiData):
 
     def to_site(self):
@@ -226,6 +235,7 @@ class UnifiAutoBackupData(UnifiData):
 
 DATA_OVERRIDE = {
     'api/self/sites': UnifiSiteData,
+    'stat/device': UnifiDeviceData,
     'cmd/backup': UnifiAutoBackupData,
 }
 
