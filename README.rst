@@ -37,7 +37,7 @@ For simple access please define a unifiapi.yaml file in the cwd or ~/.unifiapi_y
 Examples
 --------
 
-Change mss_clamp from disabled to auto
+Toggle sync cookies.
 
 .. code-block::
 
@@ -48,19 +48,19 @@ Change mss_clamp from disabled to auto
   Username (CR=erice): foo
   foo Password :
   >>> # get site object
-  >>> s = c2.sites['default']()
+  >>> c = unifiapi.controller()
+  >>> s = c.sites[0]()
   >>> settings = s.settings()
-  >>> settings['usg']
-  {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'disabled', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
-  >>> settings['usg']['mss_clamp'] = 'auto'
-  >>> settings['usg'].endpoint
-  'rest/setting/usg/5ad52945be0777002184bc4a'
-  >>> # Use put for updates
-  >>> s.put(settings['usg'].endpoint, **settings['usg'])
-  Unifi Response rest/setting/usg/5ad52945be0777002184bc4a: data 1 meta {'rc': 'ok'}
-  >>> settings = s.settings()
+  >>> settings['dpi']
+  {'_id': '5ad52945be0777002184bc49', 'enabled': True, 'key': 'dpi', 'site_id': '5ad52944be0777002184bc41'}
   >>> settings['usg']
   {'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'auto', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}
+  >>> settings['usg']['syn_cookies'] = False
+  >>> settings['usg'].update()
+  [{'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'auto', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': False, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}]
+  >>> settings['usg']['syn_cookies'] = True
+  >>> settings['usg'].update()
+  [{'_id': '5ad52945be0777002184bc4a', 'broadcast_ping': False, 'echo_server': 'ping.ubnt.com', 'ftp_module': True, 'gre_module': True, 'h323_module': True, 'key': 'usg', 'lldp_enable_all': True, 'mdns_enabled': True, 'mss_clamp': 'auto', 'mss_clamp_mss': 1452, 'offload_accounting': True, 'offload_l2_blocking': True, 'offload_sch': True, 'pptp_module': True, 'receive_redirects': False, 'send_redirects': True, 'sip_module': False, 'site_id': '5ad52944be0777002184bc41', 'syn_cookies': True, 'tftp_module': True, 'upnp_enabled': True, 'upnp_nat_pmp_enabled': True, 'upnp_secure_mode': True, 'upnp_wan_interface': 'wan'}]
   
 List backups
 
