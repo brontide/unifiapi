@@ -40,7 +40,11 @@ for list_name, url in sync_list.items():
     list_ips = sorted(set((download_ips(url))))
     try:
         unififw = fwg['list_name']
-        print("Found existing list {} with {} members - download list has {} members".format(list_name, len(unififw), len(list_ips)))
+        unifiips = sorted(set(unififw['group_members']))
+        if unifiips == list_ips:
+            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(unififw), len(list_ips)))
+        else:
+            print("List has changed, should update")
     except:
         print("No list {} found, adding".format(list_name))
         r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
