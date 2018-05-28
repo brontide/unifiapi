@@ -17,7 +17,7 @@ sync_list = {
 
 def download_ips(url):
     ''' given an ip, download a list of ips '''
-    out = requests.get(url)
+    out = requests.get(url, stream=True)
     out.raise_for_status()
     for line in out.iter_lines():
         if not line[0].isdigit():
