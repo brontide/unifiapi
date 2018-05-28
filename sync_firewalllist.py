@@ -42,6 +42,8 @@ for list_name, url in sync_list.items():
         unififw = fwg['list_name']
         print("Found existing list {} with {} members - download list has {} members".format(list_name, len(unififw), len(list_ips)))
     except:
-        print("No list {} found".format(list_name))
+        print("No list {} found, adding".format(list_name))
+        r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
+
     
 
