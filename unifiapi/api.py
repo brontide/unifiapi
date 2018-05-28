@@ -182,6 +182,11 @@ class UnifiData(UserDict):
         else:
             self._path = '/'.join([call, data['_id']])
 
+    def update(self):
+        ''' this is an attempt to update the unificontroller, due to some oddities
+        this may not always work '''
+        return self._client.put(self.endpoint, **self.data)
+
     @property
     def endpoint(self):
         return self._path
