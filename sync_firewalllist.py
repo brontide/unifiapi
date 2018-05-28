@@ -19,7 +19,7 @@ def download_ips(url):
     ''' given an ip, download a list of ips '''
     out = requests.get(url, stream=True)
     out.raise_for_status()
-    for line in out.iter_lines():
+    for line in out.iter_lines(decode_unicode=True):
         if not line[0].isdigit():
             continue
         candidate = line.split()[0]
