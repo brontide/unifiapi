@@ -403,9 +403,9 @@ class UnifiClientBase(object):
     put = partialmethod(request, 'PUT')
     delete = partialmethod(request, 'DELETE')
 
-
-
 class UnifiController(UnifiClientBase):
+    ''' UnifiController object that contains all of the controller specific
+    calls '''
 
     status = partialmethod(UnifiClientBase.request, 'GET', 'status')
     admins = partialmethod(UnifiClientBase.request, 'GET', 'api/stat/admin')
