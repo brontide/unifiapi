@@ -26,6 +26,8 @@ def download_ips(url):
         if candidate:
             yield candidate
 
+def new_firewall_group(name, list_members, group_type='address-group'):
+    return {'name': name, 'group_type': group_type, 'group_members': list(list_members) }
 
 print("Logging into controller")
 c = unifiapi.controller()
@@ -35,6 +37,11 @@ fwg = s.firewallgroups()
 
 for list_name, url in sync_list.items():
     print(f'Syncing {list_name}')
-    list_ips = set((download_ips(url)))
-    print(list_ips)
+    list_ips = sorted(set((download_ips(url))))
+    try:
+        unififw = fwg['list_name']
+        print("Found existing list {} with {} members - download list has {} members".format(list_name, len(unififw), len(list_ips)))
+    except:
+        print("No list {} found".format(list_name))
+    
 
