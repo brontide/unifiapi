@@ -419,6 +419,8 @@ class UnifiSite(UnifiClientBase):
         
 
     def _api_cmd(self, mgr, command, _req_params='', **params):
+        ''' Wrapper for calling POST system commands that follow the pattern 
+        POST cmd/{manager} with the json {'cmd': '{command-name}'} '''
         for param in _req_params:
             if param not in params:
                 raise ValueError("{mgr}.{command} requires paramater {param}".format(**locals()))
@@ -426,9 +428,13 @@ class UnifiSite(UnifiClientBase):
         return self.post('/'.join(['cmd',mgr]), **params)
 
     def mac_by_type(self, unifi_type):
+        ''' find all macs by type, uses the device_basic endpoint for a more
+        ligtweight call '''
         return [ x['mac'] for x in self.devices_basic().by_type(unifi_type) ]
 
     def list_by_type(self, unifi_type):
+        ''' find all devices by type, might be faster on large sites since it's
+        not downloading a lot of additional device data '''
         return self.devices(macs=self.mac_by_type(unifi_type))
 
     # Restful commands
