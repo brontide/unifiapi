@@ -212,7 +212,7 @@ class UnifiAutoBackupData(UnifiData):
 
     def delete(self):
         ''' Delete the referenced backup file '''
-        return self._client.c_delete_backup(self.data['filename'])
+        return self._client.c_delete_backup(filename=self.data['filename'])
 
 # For some responses we want to monkeypatch some of the calls to make
 # them easier to use, in this case being able to convert a list of sites
