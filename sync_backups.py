@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
+#
+# Simple script to show off how easy it is to automate the controller API.  This script shows off enumerating the
+# current backups, downloading, and optionally deleting all the backups from the controller
+#
+
 import unifiapi
 from pathlib import Path
 
 # MODIFY
 dest_dir = Path('/enterpoop/backups/unifi')
 delete_backups = False
-
 
 print("Logging into controller")
 c = unifiapi.controller()
@@ -23,6 +27,7 @@ for backup in backups:
         else:
             print(f"{full_file} exists and is the right size")
             if delete_backups:
+                print("Deleting {} from controller".format(backup{'filename'}))
                 backup.delete()
     else:
         print("Copying {} to {}".format(backup['filename'], full_file))
