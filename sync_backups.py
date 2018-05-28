@@ -27,7 +27,7 @@ for backup in backups:
         else:
             print(f"{full_file} exists and is the right size")
             if delete_backups:
-                print("Deleting {} from controller".format(backup{'filename'}))
+                print("Deleting {} from controller".format(backup['filename']))
                 backup.delete()
     else:
         print("Copying {} to {}".format(backup['filename'], full_file))
