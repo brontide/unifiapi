@@ -200,6 +200,14 @@ class UnifiDeviceData(UnifiData):
         parts = self._path.split('/')
         self._path = '/'.join(['rest', 'device', parts[-1]])
 
+    def reboot(self):
+        ''' reboot this device '''
+        return self._client.c_reboot(mac=self.data['mac'])
+
+    def force_provision(self):
+        ''' force provision this device '''
+        return self._client.c_force_provision(mac=self.data['mac'])
+
 class UnifiSiteData(UnifiData):
 
     def to_site(self):
@@ -487,6 +495,7 @@ class UnifiSite(UnifiClientBase):
     c_unblock_client      = partialmethod(_api_cmd, 'stamgr', 'unblock-sta', _req_params=['mac']) 
     c_disconnect_client   = partialmethod(_api_cmd, 'stamgr', 'kick-sta', _req_params=['mac']) 
     c_reboot              = partialmethod(_api_cmd, 'devmgr', 'reboot', _req_params=['mac']) 
+    c_force_provision     = partialmethod(_api_cmd, 'devmgr', 'force-provision', _req_params=['mac']) 
     c_poe_power_cycle     = partialmethod(_api_cmd, 'devmgr', 'power-cycle', _req_params=['mac', 'port_idx']) 
     c_adopt               = partialmethod(_api_cmd, 'devmgr', 'adopt', _req_params=['mac']) 
     c_speedtest           = partialmethod(_api_cmd, 'devmgr', 'speedtest') 
