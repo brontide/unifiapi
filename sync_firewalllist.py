@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
 #
-# Simple script to show off how easy it is to automate the controller API.  This script shows off enumerating the
-# current backups, downloading, and optionally deleting all the backups from the controller
-#
+# Script pulls in IP address/ranges from these URLs and updates the list on the unifi controller to match
+#  
 
 import unifiapi
 import requests
@@ -39,14 +38,14 @@ for list_name, url in sync_list.items():
     print(f'Syncing {list_name}')
     list_ips = sorted(set((download_ips(url))))
     try:
-        curfw = fwg[list_name]
+        curfw = fwg[list_name] # this will raise KeyError and fall back to adding the firewall
         curips = sorted(set(curfw['group_members']))
         if curips == list_ips:
             print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(curips), len(list_ips)))
         else:
             print("List has changed, updating")
             curfw['group_members'] = list_ips
-            curfw.update()
+            curfw.update() # Update the record.
     except KeyError:
         print("No list {} found, adding".format(list_name))
         r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
