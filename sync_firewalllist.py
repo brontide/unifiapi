@@ -39,17 +39,14 @@ for list_name, url in sync_list.items():
     print(f'Syncing {list_name}')
     list_ips = sorted(set((download_ips(url))))
     try:
-        unififw = fwg[list_name]
-        unifiips = sorted(set(unififw['group_members']))
-        if unifiips == list_ips:
-            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(unififw['group_members']), len(list_ips)))
+        curfw = fwg[list_name]
+        curips = sorted(set(curfw['group_members']))
+        if curips == list_ips:
+            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(curips), len(list_ips)))
         else:
             print("List has changed, updating")
-            unififw['group_members'] = list_ips
-            unififw.update()
+            curfw['group_members'] = list_ips
+            curfw.update()
     except KeyError:
         print("No list {} found, adding".format(list_name))
         r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
-
-    
-
