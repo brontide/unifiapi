@@ -10,8 +10,8 @@ import requests
 
 sync_list = {
     'Spamhaus EDROP': 'https://www.spamhaus.org/drop/edrop.txt',
-#    'Emerging Threats': 'http://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt',
-#    'TOR Exit Nodes': 'https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=1.1.1.1',
+    'Emerging Threats': 'http://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt',
+    'TOR Exit Nodes': 'https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=1.1.1.1',
 }
 
 
@@ -39,13 +39,15 @@ for list_name, url in sync_list.items():
     print(f'Syncing {list_name}')
     list_ips = sorted(set((download_ips(url))))
     try:
-        unififw = fwg['list_name']
+        unififw = fwg[list_name]
         unifiips = sorted(set(unififw['group_members']))
         if unifiips == list_ips:
-            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(unififw), len(list_ips)))
+            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(unififw['group_members']), len(list_ips)))
         else:
-            print("List has changed, should update")
-    except:
+            print("List has changed, updating")
+            unififw['group_members'] = list_ips
+            unififw.update()
+    except KeyError:
         print("No list {} found, adding".format(list_name))
         r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
 
