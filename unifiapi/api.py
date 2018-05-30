@@ -512,7 +512,8 @@ class UnifiSite(UnifiClientBase):
     def channels(self):
         ''' Listing of all RF channels at this site '''
         if not self._channels:
-            self._channels = self.get('stat/current-channel')        
+            self._channels = self.get('stat/current-channel')
+        return self._channels        
 
     def _api_cmd(self, mgr, command, _req_params='', **params):
         ''' Wrapper for calling POST system commands that follow the pattern 
