@@ -182,6 +182,12 @@ class UnifiData(UserDict):
         else:
             self._path = '/'.join([call, data['_id']])
 
+    def _stat_to_rest(self):
+        ''' switch from a stat/ to a rest/ endpoint for updates '''
+        parts = self._path.split('/')
+        parts[0] = 'rest'
+        self._path = '/'.join(parts)
+
     def update(self):
         ''' this is an attempt to update the unificontroller, due to some oddities
         this may not always work '''
@@ -195,10 +201,8 @@ class UnifiDeviceData(UnifiData):
 
     def __init__(self, *args, **kwargs):
         UnifiData.__init__(self, *args, **kwargs)
-        # For devices the update path is very different from the GET path so
-        # rewrite it here
-        parts = self._path.split('/')
-        self._path = '/'.join(['rest', 'device', parts[-1]])
+        # This is a confused endpoint that posts somewhere else
+        self._stat_to_rest()
 
     def reboot(self):
         ''' reboot this device '''
@@ -207,6 +211,13 @@ class UnifiDeviceData(UnifiData):
     def force_provision(self):
         ''' force provision this device '''
         return self._client.c_force_provision(mac=self.data['mac'])
+
+class UnifiDynamicDNSData(UnifiData):
+
+    def __init__(self, *args, **kwargs):
+        UnifiData.__init__(self, *args, **kwargs)
+        # This is a confused endpoint that posts somewhere else
+        self._stat_to_rest()
 
 class UnifiSiteData(UnifiData):
 
@@ -236,6 +247,22 @@ class UnifiAutoBackupData(UnifiData):
         ''' Delete the referenced backup file '''
         return self._client.c_delete_backup(filename=self.data['filename'])
 
+class UnifiDPIData(UnifiData):
+
+    def translate(self):
+        ''' go through the results and convert numeric codes to text '''
+        if 'by_cat' in self.data:
+            for item in self.data['by_cat']:
+                cat = item['cat']
+                item['category'] = DPI['categories'].get(cat, "Unknown")
+        if 'by_app' in self.data:
+            for item in self.data['by_app']:
+                code = cat_app_to_dpi(item['cat'], item['app'])
+                item['application'] = DPI['applications'].get(code, "Unknown")
+                cat = item['cat']
+                item['category'] = DPI['categories'].get(cat, "Unknown")
+
+
 # For some responses we want to monkeypatch some of the calls to make
 # them easier to use, in this case being able to convert a list of sites
 # into a fisrt class site object
@@ -244,6 +271,9 @@ class UnifiAutoBackupData(UnifiData):
 DATA_OVERRIDE = {
     'api/self/sites': UnifiSiteData,
     'stat/device': UnifiDeviceData,
+    'stat/dynamicdns': UnifiDynamicDNSData,
+    'stat/sitedpi': UnifiDPIData,
+    'stat/stadpi': UnifiDPIData,
     'cmd/backup': UnifiAutoBackupData,
 }
 
@@ -260,8 +290,6 @@ def imatch( x, y ):
         pass
     return False
 
-
-
 class UnifiResponse(UserList):
     ''' Wrapper around Unifi api return values '''
 
@@ -270,7 +298,9 @@ class UnifiResponse(UserList):
 
         self._client = session
         self.endpoint = call
-        self._out = out
+        
+        # Identifiy the correct wrapper for the return values
+        # this way we can patch in helpers as needed
         data_wrapper = data_factory(call)
         try:
             self._orig = out.json()
@@ -278,6 +308,8 @@ class UnifiResponse(UserList):
         except:
             raise
 
+        # In come cases the unifi api will return a result which does not match its 
+        # count, in these cases the results have been truncated
         if 'count' in self.meta and len(self.data) != int(self.meta['count']):
             logger.warning("Truncated API response")
             self._truncated = True
@@ -363,7 +395,7 @@ class UnifiClientBase(object):
         if not verify:
             quiet()
 
-    def __repr__(self):
+    def __str__(self):
         return "{}: {}".format(self.__class__.__name__,self.endpoint)
 
     def request(
@@ -415,31 +447,72 @@ class UnifiController(UnifiClientBase):
     ''' UnifiController object that contains all of the controller specific
     calls '''
 
-    status = partialmethod(UnifiClientBase.request, 'GET', 'status')
-    admins = partialmethod(UnifiClientBase.request, 'GET', 'api/stat/admin')
-    logout = partialmethod(UnifiClientBase.request, 'GET', 'api/logout')
-    _sites = partialmethod(UnifiClientBase.request, 'GET', 'api/self/sites')
-
     def __init__(self, *args, **kwargs):
 
         UnifiClientBase.__init__(self, *args, **kwargs)
-        status = self.status()
-        self.version = status.meta['server_version']
+        self._version = None
+        self._sites = None
+
+    def __str__(self):
+        return "{}: {} - {}".format(self.__class__.__name__,self.endpoint,self.version)
+
+    @property
+    def version(self):
+        ''' Return controller version string '''
+        if not self._version:
+            self._version = self.get('status').meta['server_version']
+        return self._version
+
+    @property
+    def sites(self):
+        ''' List of sites on this controller '''
+        if not self._sites:
+            self._sites = self.get('api/self/sites')
+        return self._sites
 
     def login(self, username=None, password=None, remember=True):
+        ''' Login to this controler
+
+        Paramaters:
+
+        username -- If empty, will prompt
+        password -- If empty, will prompt
+        remember -- defatul True, request a long-lived session
+
+        If authentication succeeds, it will populate the sites attribute.
+        '''
         ret =  self.post('api/login', username=username, password=password, remember=remember)
-        self.sites = self._sites()
         return ret
+
+    def logout(self):
+        ''' Tells the controller to expire the current session cookie
+        after which this session is no longer valid for API calls '''
+        return self.get('api/logout')
+
+    def admins(self):
+        ''' Get a list of admins for this controller '''
+        return self.get('api/stat/admin')
     
 class UnifiSite(UnifiClientBase): 
+    ''' Class to contain all the site specific endpoints and functions '''
 
     def __init__(self,*args, **kwargs):
         UnifiClientBase.__init__(self, *args, **kwargs)
-        self.cache = {}
-        self.cache['ccode']     = self.ccodes()
-        self.cache['channels']  = self.channels()
-        self.cache['clients']   = self.clients()
-        
+        self._ccodes = None
+        self._channels = None
+
+    @property
+    def ccodes(self):
+        ''' Static list of country codes known at this controller '''
+        if not self._ccodes:
+            self._ccodes = self.get('stat/ccode')
+        return self._ccodes
+
+    @property
+    def channels(self):
+        ''' Listing of all RF channels at this site '''
+        if not self._channels:
+            self._channels = self.get('stat/current-channel')        
 
     def _api_cmd(self, mgr, command, _req_params='', **params):
         ''' Wrapper for calling POST system commands that follow the pattern 
@@ -448,7 +521,7 @@ class UnifiSite(UnifiClientBase):
             if param not in params:
                 raise ValueError("{mgr}.{command} requires paramater {param}".format(**locals()))
         params['cmd'] = command
-        return self.post('/'.join(['cmd',mgr]), **params)
+        return self.post("cmd/{mgr}".format(mgr=mgr), **params)
 
     def mac_by_type(self, unifi_type):
         ''' find all macs by type, uses the device_basic endpoint for a more
@@ -460,13 +533,16 @@ class UnifiSite(UnifiClientBase):
         not downloading a lot of additional device data '''
         return self.devices(macs=self.mac_by_type(unifi_type))
 
+    def __str__(self):
+        health = self.health()
+        health_str = " ".join(( "{} {}".format(x['subsystem'], x['status']) for x in health ))
+        return '{}: {} - HEALTH {}'.format(__class__.__name__, self.endpoint, health_str)
+
     # Restful commands
     alerts          = partialmethod(UnifiClientBase.request, 'GET', 'rest/alarm')
     events          = partialmethod(UnifiClientBase.request, 'GET', 'rest/event')
     devices_basic   = partialmethod(UnifiClientBase.request, 'GET', 'stat/device-basic')
     devices         = partialmethod(UnifiClientBase.request, 'GET', 'stat/device')
-    ccodes          = partialmethod(UnifiClientBase.request, 'GET', 'stat/ccode')
-    channels        = partialmethod(UnifiClientBase.request, 'GET', 'stat/current-channel')
     health          = partialmethod(UnifiClientBase.request, 'GET', 'stat/health')
     active_clients  = partialmethod(UnifiClientBase.request, 'GET', 'stat/sta')
     clients         = partialmethod(UnifiClientBase.request, 'GET', 'rest/user')
@@ -478,7 +554,8 @@ class UnifiSite(UnifiClientBase):
     firewallgroups  = partialmethod(UnifiClientBase.request, 'GET', 'rest/firewallgroup')
     tags            = partialmethod(UnifiClientBase.request, 'GET', 'rest/tag')
     neighbors       = partialmethod(UnifiClientBase.request, 'GET', 'stat/rogueap')
-    dpi             = partialmethod(UnifiClientBase.request, 'GET', 'stat/dpi')
+    dpi             = partialmethod(UnifiClientBase.request, 'GET', 'stat/sitedpi')
+    stadpi          = partialmethod(UnifiClientBase.request, 'GET', 'stat/stadpi')
     dynamicdns      = partialmethod(UnifiClientBase.request, 'GET', 'stat/dynamicdns')
     portprofiles    = partialmethod(UnifiClientBase.request, 'GET', 'rest/portconf')
     spectrumscan    = partialmethod(UnifiClientBase.request, 'GET', 'stat/spectrumscan')
@@ -486,15 +563,18 @@ class UnifiSite(UnifiClientBase):
     account         = partialmethod(UnifiClientBase.request, 'GET', 'rest/account')
 
     c_archive_events      = partialmethod(_api_cmd, 'evtmgr', 'archive-all-alarms')
+
     c_create_site         = partialmethod(_api_cmd, 'sitemgr', 'add-site', _req_params=['desc'])
     c_delete_site         = partialmethod(_api_cmd, 'sitemgr', 'delete-site', _req_params=['name'])
     c_update_site         = partialmethod(_api_cmd, 'sitemgr', 'update-site', _req_params=['desc'])
     c_delete_device       = partialmethod(_api_cmd, 'sitemgr', 'delete-device', _req_params=['mac'])
     c_move_device         = partialmethod(_api_cmd, 'sitemgr', 'move-device', _req_params=['mac', 'site_id'])
+
     c_block_client        = partialmethod(_api_cmd, 'stamgr', 'block-sta', _req_params=['mac']) 
     c_unblock_client      = partialmethod(_api_cmd, 'stamgr', 'unblock-sta', _req_params=['mac']) 
     c_disconnect_client   = partialmethod(_api_cmd, 'stamgr', 'kick-sta', _req_params=['mac']) 
-    c_reboot              = partialmethod(_api_cmd, 'devmgr', 'reboot', _req_params=['mac']) 
+
+    c_reboot              = partialmethod(_api_cmd, 'devmgr', 'restart', _req_params=['mac']) 
     c_force_provision     = partialmethod(_api_cmd, 'devmgr', 'force-provision', _req_params=['mac']) 
     c_poe_power_cycle     = partialmethod(_api_cmd, 'devmgr', 'power-cycle', _req_params=['mac', 'port_idx']) 
     c_adopt               = partialmethod(_api_cmd, 'devmgr', 'adopt', _req_params=['mac']) 
@@ -505,8 +585,10 @@ class UnifiSite(UnifiClientBase):
     c_upgrade             = partialmethod(_api_cmd, 'devmgr', 'upgrade', _req_params=['mac']) 
     c_upgrade_external    = partialmethod(_api_cmd, 'devmgr', 'upgrade-external', _req_params=['mac', 'url']) 
     c_spectrum_scan       = partialmethod(_api_cmd, 'devmgr', 'spectrum-scan', _req_params=['mac']) 
+
     c_backups             = partialmethod(_api_cmd, 'backup', 'list-backups')
     c_delete_backup       = partialmethod(_api_cmd, 'backup', 'delete-backup', _req_params=['filename'])
+
     c_make_backup         = partialmethod(_api_cmd, 'system', 'backup')
     c_check_firmware      = partialmethod(_api_cmd, 'system', 'check-firmware-update')
 
