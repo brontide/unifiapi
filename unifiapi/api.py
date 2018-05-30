@@ -193,9 +193,19 @@ class UnifiData(UserDict):
         this may not always work '''
         return self._client.put(self.endpoint, **self.data)
 
+    def delete(self):
+        ''' Attempts to delete the item by calling DELETE on the endpoint '''
+        return self._client.delete(self.endpoint)
+
     @property
     def endpoint(self):
         return self._path
+
+class UniFiClientData(UnifiData):
+
+    def delete(self):
+        ''' In order to "delete" a client we're actually forgetting it '''
+        return self._client.c_forget_client(mac=self.data['mac'])
 
 class UnifiDeviceData(UnifiData):
 
@@ -272,6 +282,8 @@ DATA_OVERRIDE = {
     'api/self/sites': UnifiSiteData,
     'stat/device': UnifiDeviceData,
     'stat/dynamicdns': UnifiDynamicDNSData,
+    'stat/sta': UniFiClientData,
+    'rest/user': UniFiClientData,
     'stat/sitedpi': UnifiDPIData,
     'stat/stadpi': UnifiDPIData,
     'cmd/backup': UnifiAutoBackupData,
@@ -574,6 +586,7 @@ class UnifiSite(UnifiClientBase):
     c_block_client        = partialmethod(_api_cmd, 'stamgr', 'block-sta', _req_params=['mac']) 
     c_unblock_client      = partialmethod(_api_cmd, 'stamgr', 'unblock-sta', _req_params=['mac']) 
     c_disconnect_client   = partialmethod(_api_cmd, 'stamgr', 'kick-sta', _req_params=['mac']) 
+    c_forget_client       = partialmethod(_api_cmd, 'stamgr', 'forget-sta', _req_params=['mac'])  # Controller 5.9.X
 
     c_reboot              = partialmethod(_api_cmd, 'devmgr', 'restart', _req_params=['mac']) 
     c_force_provision     = partialmethod(_api_cmd, 'devmgr', 'force-provision', _req_params=['mac']) 
@@ -593,6 +606,8 @@ class UnifiSite(UnifiClientBase):
     c_make_backup         = partialmethod(_api_cmd, 'system', 'backup')
     c_check_firmware      = partialmethod(_api_cmd, 'system', 'check-firmware-update')
 
+    c_clear_dpi           = partialmethod(_api_cmd, 'stat', 'reset-dpi')
+    
 
 ''' A little python magic to automatically add device_macs and list_device for all known device 
 types into the UnifiSite object '''
