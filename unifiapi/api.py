@@ -552,13 +552,15 @@ class UnifiSite(UnifiClientBase):
         return '{}: {} - HEALTH {}'.format(__class__.__name__, self.endpoint, health_str)
 
     def _report(self, rtype='site', interval='hourly', attrs=None, start=None, end=None, **kwargs):
-        if rtype not in ['site', 'user']: raise ValueError('Type must be site or user')
+        if rtype not in ['site', 'user', 'ap']: raise ValueError('Type must be site or user')
         if interval not in ['5minutes', 'hourly', 'daily']: raise ValueError('Interval must be 5minutes, hourly, daily')
         if not attrs:
             if rtype == 'site':
                 attrs = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time']
             elif rtype == 'user':
                 attrs = ['rx_bytes', 'tx_bytes', 'time']
+            elif rtype == 'ap':
+                attrs = ['bytes', 'num_sta', 'time']
         kwargs['attrs'] = attrs
         if start:
             kwargs['start'] = start
@@ -569,6 +571,7 @@ class UnifiSite(UnifiClientBase):
 
     user_report = partialmethod(_report, rtype='user')
     site_report = partialmethod(_report, rtype='site')
+    ap_report = partialmethod(_report, rtype='ap')
 
     # Restful commands
     alerts          = partialmethod(UnifiClientBase.request, 'GET', 'rest/alarm')
