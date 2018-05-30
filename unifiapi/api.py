@@ -551,6 +551,25 @@ class UnifiSite(UnifiClientBase):
         health_str = " ".join(( "{} {}".format(x['subsystem'], x['status']) for x in health ))
         return '{}: {} - HEALTH {}'.format(__class__.__name__, self.endpoint, health_str)
 
+    def _report(self, rtype='site', interval='hourly', attrs=None, start=None, end=None, **kwargs):
+        if rtype not in ['site', 'user']: raise ValueError('Type must be site or user')
+        if interval not in ['5minutes', 'hourly', 'daily']: raise ValueError('Interval must be 5minutes, hourly, daily')
+        if not attrs:
+            if rtype == 'site':
+                attrs = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time']
+            elif rtype == 'user':
+                attrs = ['rx_bytes', 'tx_bytes', 'time']
+        kwargs['attrs'] = attrs
+        if start:
+            kwargs['start'] = start
+        if end:
+            kwargs['end'] = end
+
+        return self.post('stat/report/{}.{}'.format(interval,rtype), **kwargs)
+
+    user_report = partialmethod(_report, rtype='user')
+    site_report = partialmethod(_report, rtype='site')
+
     # Restful commands
     alerts          = partialmethod(UnifiClientBase.request, 'GET', 'rest/alarm')
     events          = partialmethod(UnifiClientBase.request, 'GET', 'rest/event')
@@ -607,7 +626,7 @@ class UnifiSite(UnifiClientBase):
     c_check_firmware      = partialmethod(_api_cmd, 'system', 'check-firmware-update')
 
     c_clear_dpi           = partialmethod(_api_cmd, 'stat', 'reset-dpi')
-    
+
 
 ''' A little python magic to automatically add device_macs and list_device for all known device 
 types into the UnifiSite object '''
