@@ -9,7 +9,7 @@ import time
 from datetime import datetime
 
 tracking = 'tx_bytes' # download = tx_bytes / upload = rx_bytes
-threshold = (1.5*1024*1024)/8 # 1.5 mbps
+threshold = (1*1024*1024)/8 # 1.5 mbps
 interval = '5minutes'
 interval_sec = 5*60 # 300 seconds in 5 mintues to calculate bandwidth
 
