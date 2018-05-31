@@ -3,12 +3,37 @@
 #
 # Script to show bandwidth usage by client over a definable threshold
 #
+# The 5 minutes averages seem to poorly catch the peaks that you might see on the 
+# dashboard graph.
+#
+
+'''
+Logging into controller
+Fetching and processing client lists
+Fetching bandwidth per user report
+05-30 04:00 PM
+iPad 1416 kbps
+05-30 05:50 PM
+iPad 1344 kbps
+05-30 05:55 PM
+iPad 1432 kbps
+05-30 06:00 PM
+iPad 1424 kbps
+05-30 10:15 PM
+Basselope 3344 kbps
+05-30 10:20 PM
+Basselope 11896 kbps
+05-30 10:25 PM
+Basselope 6568 kbps
+05-31 12:15 AM
+DESKTOP-20CSORF 3336 kbps
+'''
 
 from unifiapi import controller
 import time
 from datetime import datetime
 
-tracking = 'tx_bytes' # download = tx_bytes / upload = rx_bytes
+tracking = 'rx_bytes' # download = tx_bytes / upload = rx_bytes
 threshold = (1*1024*1024)/8 # 1.5 mbps
 interval = '5minutes'
 interval_sec = 5*60 # 300 seconds in 5 mintues to calculate bandwidth
@@ -22,15 +47,15 @@ clients = s.clients()
 
 def best_name(client):
     if 'name' in client:
-        return "{name} ({mac})".format(**client)
+        return "{name}".format(**client)
     if 'hostname' in client:
-        return "{hostname} ({mac})".format(**client)
+        return "{hostname}".format(**client)
     return "UKN ({mac})".format(**client)
 
 mac_to_name = dict(( (x['mac'], best_name(x)) for x in clients ))
 
 end = time.time()*1000
-start = end-(86400*1000)
+start = end-(60*60*24*1000)
 
 print("Fetching bandwidth per user report")
 bandwidth_per_user = s.user_report(interval=interval, end=end, start=start)
