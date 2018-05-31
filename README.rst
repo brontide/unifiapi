@@ -1,4 +1,4 @@
-Unifi API library and cli tool
+Unifi API library and examples
 ================================
 
 ALPHA API tool.  This is still very perliminary and much documentation has yet to be written.  This is written for
@@ -28,7 +28,7 @@ For simple access please define a unifiapi.yaml file in the cwd or ~/.unifiapi_y
     password: '12345'
     verify: False
   other:
-    endpoint: 'https://unifi.myothersite.com'
+    endpoint: 'https://10.11.12.13:8443'
     username: 'bob'
     password: '42'
     verify: True
@@ -37,18 +37,16 @@ For simple access please define a unifiapi.yaml file in the cwd or ~/.unifiapi_y
 Examples
 --------
 
-Toggle sync cookies.
+Toggle syn cookies.
 
 .. code-block::
 
-  >>> import unifiapi
+  >>> from unifiapi import controller
   >>> # Get controller object
-  >>> c2 = unifiapi.controller(endpoint='https://192.168.111.20:8443', verify=False)
+  >>> c = controller(endpoint='https://192.168.111.20:8443', verify=False)
   Please enter credentials for Unifi https://192.168.111.20:8443
   Username (CR=erice): foo
   foo Password :
-  >>> # get site object
-  >>> c = unifiapi.controller()
   >>> s = c.sites[0]()
   >>> settings = s.settings()
   >>> settings['dpi']
