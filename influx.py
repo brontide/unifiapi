@@ -20,7 +20,7 @@ s = c.sites[site_name]()
 
 try:
     default_tags = {
-        'hostname': s.sysinfo()['hostname'],
+        'hostname': s.sysinfo()[0]['hostname'],
         'site': c.sites[site_name]['desc']
     }
 except:
