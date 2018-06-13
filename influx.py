@@ -9,11 +9,7 @@ from pprint import pprint
 profile = 'byip'
 site_name = 'default'
 
-# Uncomment the latter and fill in appropriate values to augment datapoint with default tags
-# For the controller and site name
 default_tags = None
-#default_tags = { 'controller': 'my_controller',
-#                 'site': site_name }
 
 client = InfluxDBClient('localhost', 8086)
 
@@ -21,6 +17,14 @@ client = InfluxDBClient('localhost', 8086)
 
 c = controller(profile=profile)
 s = c.sites[site_name]()
+
+try:
+    default_tags = {
+        'hostname': s.sysinfo()['hostname'],
+        'site': c.sites[site_name]['desc']
+    }
+except:
+    print("Could not generate site default tags")
 
 client.create_database('unifi')
 client.switch_database('unifi')
