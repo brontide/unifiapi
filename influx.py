@@ -21,7 +21,8 @@ s = c.sites[site_name]()
 try:
     default_tags = {
         'hostname': s.sysinfo()[0]['hostname'],
-        'site': c.sites[site_name]['desc']
+        'site': site_name,
+        'desc': c.sites[site_name]['desc']
     }
 except:
     print("Could not generate site default tags")
