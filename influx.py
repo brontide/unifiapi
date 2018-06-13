@@ -4,14 +4,20 @@ from random import randint
 from time import sleep
 from datetime import datetime
 from pprint import pprint
-import pytz
 
-dpi_tz = pytz.timezone('America/New_York')
-influx_tz = pytz.timezone('UTC')
+# EDIT
 profile = 'byip'
 site_name = 'default'
 
+# Uncomment the latter and fill in appropriate values to augment datapoint with default tags
+# For the controller and site name
+default_tags = None
+#default_tags = { 'controller': 'my_controller',
+#                 'site': site_name }
+
 client = InfluxDBClient('localhost', 8086)
+
+# END EDIT
 
 c = controller(profile=profile)
 s = c.sites[site_name]()
@@ -139,7 +145,7 @@ while True:
         pass
                     
     if json:
-        while not client.write_points(json):
+        while not client.write_points(json, tags=default_tags):
             # keep trying every second to post results
             sleep(1)
         #pprint(json)

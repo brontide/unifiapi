@@ -37,6 +37,16 @@ install_aliases()
 # END py2 compatibility cruft
 #
 
+def quiet():
+    ''' This function turns off InsecureRequestWarnings '''
+    try:
+        # old vendored packages
+        requests.packages.urllib3.disable_warnings() #pylint: disable=E1101
+    except:
+        # New way
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
 import requests
 import logging
 from getpass import getpass, getuser
@@ -50,15 +60,7 @@ import yaml
 import json
 import pkg_resources
     
-def quiet():
-    ''' This function turns off InsecureRequestWarnings '''
-    try:
-        # old vendored packages
-        requests.packages.urllib3.disable_warnings() #pylint: disable=E1101
-    except:
-        # New way
-        import urllib3
-        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 logger = logging.getLogger(__name__)
 
