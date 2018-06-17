@@ -118,14 +118,14 @@ while True:
                 'time': time_str(ts),
                 'fields': {}
                 }
-            field['cpu'] = float(dev['system-stats']['cpu'])
-            field['mem'] = float(dev['system-stats']['mem'])
+            temp_json['fields']['cpu'] = float(dev['system-stats']['cpu'])
+            temp_json['fields']['mem'] = float(dev['system-stats']['mem'])
             try:
-                field['temp'] = float(dev['general_temperature'])
+                temp_json['fields']['temp'] = float(dev['general_temperature'])
             except:
                 pass
             try:
-                field['fan_level'] = int(dev['fan_level'])
+                temp_json['fields']['fan_level'] = int(dev['fan_level'])
             except:
                 pass
             if not is_dup(temp_json):
