@@ -4,6 +4,7 @@ from random import randint
 from time import sleep
 from datetime import datetime
 from pprint import pprint
+from time import time
 
 # EDIT
 profile = 'byip'
@@ -33,6 +34,20 @@ client.switch_database('unifi')
 current_data = {}
 last_app_dpi = 0
 last_cat_dpi = 0
+
+dups = {}
+def is_dup(point):
+    cts = time()
+    _id = [ point['measurement'] ]
+    _id.extend( point['tags'].values() )
+    xid = '-'.join(_id)
+    yid = '-'.join( map(str, point['fields'].values()) )
+    if xid in dups:
+        ( ts, cyid ) = dups[xid]
+        if cyid == yid and (cts-ts)<60:
+            return True
+    dups[xid] = (cts, yid)
+    return False
 
 def time_str(dt):
     return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -90,6 +105,30 @@ while True:
                     current_data[(mac,field)] = [value, ts]
                     temp_json['fields'][field] = value
             if temp_json['fields']:
+                json.append(temp_json)
+
+            # device system stats
+            temp_json = {
+                'measurement': 'system-stats',
+                'tags': {
+                    'name': dev['name'],
+                    'mac': dev['mac'],
+                    'type': dev['type'],
+                    },
+                'time': time_str(ts),
+                'fields': {}
+                }
+            field['cpu'] = float(dev['system-stats']['cpu'])
+            field['mem'] = float(dev['system-stats']['mem'])
+            try:
+                field['temp'] = float(dev['general_temperature'])
+            except:
+                pass
+            try:
+                field['fan_level'] = int(dev['fan_level'])
+            except:
+                pass
+            if not is_dup(temp_json):
                 json.append(temp_json)
 
         # client activity
