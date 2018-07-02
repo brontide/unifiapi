@@ -2,7 +2,10 @@ from unifiapi import controller
 from time import sleep
 from requests import post
 
-url = 'https://discordapp.com/api/webhooks/458364719699591168/Hehms2ae1546BEvcRzNYzBlAHM-H1soFcPlPcPk5rcgGZdM575zKDocRzoPKw6uXYCi7/slack'
+# create a file secrets.py and define 
+# url = "slack comptible endpoint url"
+from secrets import url
+
 c = controller()
 s = c.sites['default']()
 site_name = c.sites['default']['desc']
