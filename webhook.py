@@ -70,7 +70,7 @@ def health_to_attachments(health, previous=None, ignore_unknown=False):
 
 while True:
     new = s.health()
-    res = health_to_attachments(new, previous=hlth, ignore_unknown=True)
+    res = health_to_attachments(new, previous=hlth, ignore_unknown=False)
     if res:
         data = { 'username': 'Health Status', 'text': f'Health for {site_name}', 'attachments': res }
         post(url, json=data)
