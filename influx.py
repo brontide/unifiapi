@@ -54,7 +54,10 @@ def time_str(dt):
 
 def dev_to_measures(dev):
     for field in ['rx_bytes', 'rx_packets', 'rx_dropped', 'rx_errors', 'tx_bytes','tx_packets', 'tx_dropped', 'tx_errors']:
-        yield dev['mac'], field, dev['uplink'][field]
+        try:
+            yield dev['mac'], field, dev['uplink'][field]
+        except:
+            pass
     yield dev['mac'], 'num_sta', dev['num_sta']
 
 def client_markup(client, devs):
@@ -118,8 +121,11 @@ while True:
                 'time': time_str(ts),
                 'fields': {}
                 }
-            temp_json['fields']['cpu'] = float(dev['system-stats']['cpu'])
-            temp_json['fields']['mem'] = float(dev['system-stats']['mem'])
+            try:
+                temp_json['fields']['cpu'] = float(dev['system-stats']['cpu'])
+                temp_json['fields']['mem'] = float(dev['system-stats']['mem'])
+            except:
+                pass
             try:
                 temp_json['fields']['temp'] = float(dev['general_temperature'])
             except:
@@ -128,7 +134,7 @@ while True:
                 temp_json['fields']['fan_level'] = int(dev['fan_level'])
             except:
                 pass
-            if not is_dup(temp_json):
+            if len(temp_json['fields']) and not is_dup(temp_json):
                 json.append(temp_json)
 
         # client activity
