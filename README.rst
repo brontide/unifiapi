@@ -14,7 +14,7 @@ thing ( see sites['default'] in examples ).  There is a meta property which has 
 .. code-block:: python
 
   import unifiapi
-  c = unifiapi.controller(endpoint='https://unifi:8443', usernane='ubnt', password='ubnt', verify=False)
+  c = unifiapi.controller(endpoint='https://unifi:8443', username='ubnt', password='ubnt', verify=False)
   s = c.sites['default']()
   s.devices()
 
