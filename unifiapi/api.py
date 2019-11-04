@@ -270,9 +270,9 @@ class UnifiDPIData(UnifiData):
         if 'by_app' in self.data:
             for item in self.data['by_app']:
                 code = cat_app_to_dpi(item['cat'], item['app'])
-                item['application'] = DPI['applications'].get(code, "Unknown")
+                item['application'] = DPI['applications'].get(code, "Unknown-{}".format(code))
                 cat = item['cat']
-                item['category'] = DPI['categories'].get(cat, "Unknown")
+                item['category'] = DPI['categories'].get(cat, "Unknown-{}".format(cat))
 
 
 # For some responses we want to monkeypatch some of the calls to make
@@ -594,6 +594,7 @@ class UnifiSite(UnifiClientBase):
     dpi             = partialmethod(UnifiClientBase.request, 'GET', 'stat/sitedpi')
     stadpi          = partialmethod(UnifiClientBase.request, 'GET', 'stat/stadpi')
     dynamicdns      = partialmethod(UnifiClientBase.request, 'GET', 'stat/dynamicdns')
+    networks        = partialmethod(UnifiClientBase.request, 'GET', 'rest/networkconf')
     portprofiles    = partialmethod(UnifiClientBase.request, 'GET', 'rest/portconf')
     spectrumscan    = partialmethod(UnifiClientBase.request, 'GET', 'stat/spectrumscan')
     radiusprofiles  = partialmethod(UnifiClientBase.request, 'GET', 'rest/radiusprofile')
