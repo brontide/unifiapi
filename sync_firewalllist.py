@@ -6,11 +6,13 @@
 
 import unifiapi
 import requests
+import json
 
 sync_list = {
-    'Spamhaus EDROP': 'https://www.spamhaus.org/drop/edrop.txt',
-    'Emerging Threats': 'http://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt',
+    'Spamhaus_EDROP': 'https://www.spamhaus.org/drop/edrop.txt',
+    'Emerging_Threats': 'http://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt',
     'TOR Exit Nodes': 'https://check.torproject.org/cgi-bin/TorBulkExitList.py?ip=1.1.1.1',
+    'Bad_Packets_List': 'https://raw.githubusercontent.com/tg12/bad_packets_blocklist/master/bad_packets_list.txt'
 }
 
 
@@ -19,7 +21,7 @@ def download_ips(url):
     out = requests.get(url, stream=True)
     out.raise_for_status()
     for line in out.iter_lines(decode_unicode=True):
-        if not line or not line[0].isdigit():
+        if not line or not str(line[0]).isdigit():
             continue
         candidate = line.split()[0]
         if candidate:
@@ -27,10 +29,10 @@ def download_ips(url):
 
 
 def new_firewall_group(name, list_members, group_type='address-group'):
-    return {
+    return json.dumps({
         'name': name,
         'group_type': group_type,
-        'group_members': list(list_members)}
+        'group_members': list(list_members)})
 
 
 print("Logging into controller")
@@ -58,4 +60,4 @@ for list_name, url in sync_list.items():
             curfw.update()  # Update the record.
     except KeyError:
         print("No list {} found, adding".format(list_name))
-        r = s.firewallgroups(**new_firewall_group(list_name, list_ips))
+        r = s.firewallgroups(new_firewall_group(list_name, list_ips))
