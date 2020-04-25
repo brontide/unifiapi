@@ -33,6 +33,6 @@ for backup in backups:
         print("Copying {} to {}".format(backup['filename'], full_file))
         try:
             full_file.write_bytes(backup.download().read())
-        except:
+        except BaseException:
             # Oops, delete file that could be only partly complete
             full_file.unlink()

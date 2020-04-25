@@ -2,7 +2,7 @@
 
 #
 # Script pulls in IP address/ranges from these URLs and updates the list on the unifi controller to match
-#  
+#
 
 import unifiapi
 import requests
@@ -25,8 +25,13 @@ def download_ips(url):
         if candidate:
             yield candidate
 
+
 def new_firewall_group(name, list_members, group_type='address-group'):
-    return {'name': name, 'group_type': group_type, 'group_members': list(list_members) }
+    return {
+        'name': name,
+        'group_type': group_type,
+        'group_members': list(list_members)}
+
 
 print("Logging into controller")
 c = unifiapi.controller()
@@ -38,14 +43,19 @@ for list_name, url in sync_list.items():
     print(f'Syncing {list_name}')
     list_ips = sorted(set((download_ips(url))))
     try:
-        curfw = fwg[list_name] # this will raise KeyError and fall back to adding the firewall
+        # this will raise KeyError and fall back to adding the firewall
+        curfw = fwg[list_name]
         curips = sorted(set(curfw['group_members']))
         if curips == list_ips:
-            print("Found IDENTICAL existing list {} with {} members - download list has {} members".format(list_name, len(curips), len(list_ips)))
+            print(
+                "Found IDENTICAL existing list {} with {} members - download list has {} members".format(
+                    list_name,
+                    len(curips),
+                    len(list_ips)))
         else:
             print("List has changed, updating")
             curfw['group_members'] = list_ips
-            curfw.update() # Update the record.
+            curfw.update()  # Update the record.
     except KeyError:
         print("No list {} found, adding".format(list_name))
         r = s.firewallgroups(**new_firewall_group(list_name, list_ips))

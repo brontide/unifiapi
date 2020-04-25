@@ -20,4 +20,3 @@ sleep(5)
 print("Re-enabling DPI")
 settings['dpi']['enabled'] = True
 settings['dpi'].update()
-
