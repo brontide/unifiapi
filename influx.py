@@ -1,3 +1,21 @@
+'''THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE
+DISTRIBUTING THE SOFTWARE BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY,
+WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.'''
+
+# Bitcoin Cash (BCH)   qpz32c4lg7x7lnk9jg6qg7s4uavdce89myax5v5nuk
+# Ether (ETH) -        0x843d3DEC2A4705BD4f45F674F641cE2D0022c9FB
+# Litecoin (LTC) -     Lfk5y4F7KZa9oRxpazETwjQnHszEPvqPvu
+# Bitcoin (BTC) -      34L8qWiQyKr8k4TnHDacfjbaSqQASbBtTd
+
+# contact :- github@jamessawyer.co.uk
+
+
+
 from influxdb import InfluxDBClient
 from unifiapi import controller, UnifiApiError
 from random import randint
@@ -25,7 +43,7 @@ try:
         'site': site_name,
         'desc': c.sites[site_name]['desc']
     }
-except:
+except BaseException:
     print("Could not generate site default tags")
 
 client.create_database('unifi')
@@ -36,45 +54,70 @@ last_app_dpi = 0
 last_cat_dpi = 0
 
 dups = {}
+
+
 def is_dup(point):
     cts = time()
-    _id = [ point['measurement'] ]
-    _id.extend( point['tags'].values() )
+    _id = [point['measurement']]
+    _id.extend(point['tags'].values())
     xid = '-'.join(_id)
-    yid = '-'.join( map(str, point['fields'].values()) )
+    yid = '-'.join(map(str, point['fields'].values()))
     if xid in dups:
-        ( ts, cyid ) = dups[xid]
-        if cyid == yid and (cts-ts)<60:
+        (ts, cyid) = dups[xid]
+        if cyid == yid and (cts - ts) < 60:
             return True
     dups[xid] = (cts, yid)
     return False
 
+
 def time_str(dt):
     return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+
 def dev_to_measures(dev):
-    for field in ['rx_bytes', 'rx_packets', 'rx_dropped', 'rx_errors', 'tx_bytes','tx_packets', 'tx_dropped', 'tx_errors']:
+    for field in [
+        'rx_bytes',
+        'rx_packets',
+        'rx_dropped',
+        'rx_errors',
+        'tx_bytes',
+        'tx_packets',
+        'tx_dropped',
+            'tx_errors']:
         try:
             yield dev['mac'], field, dev['uplink'][field]
-        except:
+        except BaseException:
             pass
     yield dev['mac'], 'num_sta', dev['num_sta']
+
 
 def client_markup(client, devs):
     if 'ap_mac' in client:
         # try to get the name
         try:
-            ap = devs.filter_by('mac',client['ap_mac'])
+            ap = devs.filter_by('mac', client['ap_mac'])
             client.data['ap_name'] = ap[0]['name']
-        except:
+        except BaseException:
             pass
 
+
 def client_to_measures(client):
-    for field in ['rx_bytes', 'rx_packets', 'tx_bytes','tx_packets', 'ap_name', 'essid', 'rssi', 'rx_rate', 'tx_rate', 'channel']:
+    for field in [
+        'rx_bytes',
+        'rx_packets',
+        'tx_bytes',
+        'tx_packets',
+        'ap_name',
+        'essid',
+        'rssi',
+        'rx_rate',
+        'tx_rate',
+            'channel']:
         try:
             yield client['mac'], field, client[field]
-        except:
+        except BaseException:
             pass
+
 
 def client_best_name(client):
     if 'name' in client:
@@ -82,6 +125,7 @@ def client_best_name(client):
     if 'hostname' in client:
         return client['hostname']
     return "UNKN-{}".format(client['mac'])
+
 
 while True:
     json = []
@@ -98,14 +142,16 @@ while True:
                     'name': dev['name'],
                     'mac': dev['mac'],
                     'type': dev['type'],
-                    },
+                },
                 'time': time_str(ts),
                 'fields': {}
-                }
-            for mac,field,value in dev_to_measures(dev):
-                cur_value, cur_ts = current_data.get((mac,field), [0,datetime.fromtimestamp(10000)])
-                if value != cur_value or (ts-cur_ts).total_seconds() > 30+randint(0,10):
-                    current_data[(mac,field)] = [value, ts]
+            }
+            for mac, field, value in dev_to_measures(dev):
+                cur_value, cur_ts = current_data.get(
+                    (mac, field), [0, datetime.fromtimestamp(10000)])
+                if value != cur_value or (
+                        ts - cur_ts).total_seconds() > 30 + randint(0, 10):
+                    current_data[(mac, field)] = [value, ts]
                     temp_json['fields'][field] = value
             if temp_json['fields']:
                 json.append(temp_json)
@@ -117,22 +163,22 @@ while True:
                     'name': dev['name'],
                     'mac': dev['mac'],
                     'type': dev['type'],
-                    },
+                },
                 'time': time_str(ts),
                 'fields': {}
-                }
+            }
             try:
                 temp_json['fields']['cpu'] = float(dev['system-stats']['cpu'])
                 temp_json['fields']['mem'] = float(dev['system-stats']['mem'])
-            except:
+            except BaseException:
                 pass
             try:
                 temp_json['fields']['temp'] = float(dev['general_temperature'])
-            except:
+            except BaseException:
                 pass
             try:
                 temp_json['fields']['fan_level'] = int(dev['fan_level'])
-            except:
+            except BaseException:
                 pass
             if len(temp_json['fields']) and not is_dup(temp_json):
                 json.append(temp_json)
@@ -140,64 +186,65 @@ while True:
         # client activity
         clients = s.active_clients()
         for cli in clients:
-            client_markup(cli,devs)
+            client_markup(cli, devs)
             temp_json = {
                 'measurement': 'client',
                 'tags': {
                     'name': client_best_name(cli),
                     'mac': cli['mac'],
-                    },
+                },
                 'time': time_str(ts),
                 'fields': {}
-                }
-            for mac,field,value in client_to_measures(cli):
-                cur_value, cur_ts = current_data.get((mac,field), [0,datetime.fromtimestamp(10000)])
-                if value != cur_value or (ts-cur_ts).total_seconds() > 60+randint(0,30):
-                    current_data[(mac,field)] = [value, ts]
+            }
+            for mac, field, value in client_to_measures(cli):
+                cur_value, cur_ts = current_data.get(
+                    (mac, field), [0, datetime.fromtimestamp(10000)])
+                if value != cur_value or (
+                        ts - cur_ts).total_seconds() > 60 + randint(0, 30):
+                    current_data[(mac, field)] = [value, ts]
                     temp_json['fields'][field] = value
             if temp_json['fields']:
                 print(temp_json)
                 json.append(temp_json)
-
 
         # Site DPI
         dpi = s.dpi(type='by_app')
         dpi[0].translate()
         for row in dpi[0]['by_app']:
             tags = {
-                    'appid': (row['cat']<<16)+row['app'],
-                    'application': row['application'],
-                    }
-            fields = { 
-                    'category': row['category'],
-                    'rx_bytes': row['rx_bytes'],
-                    'rx_packets': row['rx_packets'],
-                    'tx_bytes': row['tx_bytes'],
-                    'tx_packets': row['tx_packets'],
-                    }
+                'appid': (row['cat'] << 16) + row['app'],
+                'application': row['application'],
+            }
+            fields = {
+                'category': row['category'],
+                'rx_bytes': row['rx_bytes'],
+                'rx_packets': row['rx_packets'],
+                'tx_bytes': row['tx_bytes'],
+                'tx_packets': row['tx_packets'],
+            }
             cur_field = current_data.get(tuple(tags.items()), {})
             if tuple(fields.items()) != tuple(cur_field.items()):
-                #print(tags,fields)
+                # print(tags,fields)
                 current_data[tuple(tags.items())] = fields
                 json.append({
                     'time': time_str(ts),
                     'measurement': 'dpi_site_by_app',
                     'tags': tags,
                     'fields': fields,
-                    })
+                })
     except UnifiApiError:
         print("exception in controller, wait 30 and try logging in again")
         sleep(30)
         c = controller(profile=profile)
         s = c.sites[site_name]()
-    except:
+    except BaseException:
         print("exception in gather")
         pass
-                    
+
     if json:
         while not client.write_points(json, tags=default_tags):
             # keep trying every second to post results
             sleep(1)
-        #pprint(json)
+        # pprint(json)
     print(ts)
     sleep(10)
