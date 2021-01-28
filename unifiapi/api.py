@@ -417,6 +417,7 @@ class UnifiClientBase(object):
             method,
             endpoint,
             raise_on_error=True,
+            no_decode_return=False,
             args=None,
             stream=False,
             **params):
@@ -439,8 +440,15 @@ class UnifiClientBase(object):
         
         logger.debug("Results from %s status %i preview %s",
                      out.url, out.status_code, out.text[:20])
+
+
         if raise_on_error and out.status_code != requests.codes['ok']:
             raise UnifiApiError(out)
+        
+        # Don't try to decode the output
+        if no_decode_return:
+            return out
+        
         try:
             ret = UnifiResponse(self, endpoint, out)
             if raise_on_error and not ret.is_ok:
@@ -495,7 +503,16 @@ class UnifiController(UnifiClientBase):
 
         If authentication succeeds, it will populate the sites attribute.
         '''
-        ret =  self.post('api/login', username=username, password=password, remember=remember)
+        
+        # UnifiOS hack
+        login_path = 'api/login'
+        try:
+            udmp_check = self.get('/')
+            login_path = 'api/auth/login'
+        except:
+            pass
+
+        ret =  self.post(login_path, username=username, password=password, remember=remember, no_decode_return=True)
         return ret
 
     def logout(self):
