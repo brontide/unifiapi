@@ -168,8 +168,8 @@ class UnifiApiError(UnifiError):
                 data['meta']['msg'], out.url))
         except BaseException:
             UnifiError.__init__(
-                self, "URL: {} status code {}".format(
-                    out.url, out.status_code))
+                self, "URL: {} {} status code {}\n{}".format(
+                    out.url, out.headers, out.status_code, out.text))
 
 class UnifiData(UserDict):
 
@@ -237,7 +237,11 @@ class UnifiSiteData(UnifiData):
         try:
             return self._site #pylint: disable=E0203
         except: pass
-        self._site = UnifiSite(session = self._client._s, 
+        if self._client.proxy:
+            self._site = UnifiSite(session = self._client._s, 
+                endpoint = '/'.join([self._client.endpoint, self._client.proxy, 'api/s', self.data['name']]))
+        else:
+            self._site = UnifiSite(session = self._client._s, 
                 endpoint = '/'.join([self._client.endpoint, 'api/s', self.data['name']]))
         return self._site
     
@@ -396,6 +400,7 @@ class UnifiClientBase(object):
             self,
             session=None,
             endpoint=None,
+            proxy=None,
             verify=True):
 
         if not session:
@@ -405,6 +410,10 @@ class UnifiClientBase(object):
             self._s = session
 
         self.endpoint = endpoint.rstrip('/')
+        if proxy:
+            self.proxy = proxy.rstrip('/')
+        else:
+            self.proxy = None
         self._s.verify = verify
         if not verify:
             quiet()
@@ -417,7 +426,8 @@ class UnifiClientBase(object):
             method,
             endpoint,
             raise_on_error=True,
-            no_decode_return=False,
+            x_decode=True,
+            x_proxy=True,
             args=None,
             stream=False,
             **params):
@@ -429,24 +439,34 @@ class UnifiClientBase(object):
         if params and method == 'GET':
             method = 'POST'
 
-        url = '/'.join([self.endpoint, quote(endpoint)])
-        logger.debug("%s %s <- %s", method, url, repr(json)[:20])
+        # UnifiOS hackish
+        if self.proxy and x_proxy:
+            url = '/'.join([self.endpoint, self.proxy, quote(endpoint)])
+        else:
+            url = '/'.join([self.endpoint, quote(endpoint)])
+
+        logger.debug("%s %s <- %s", method, url, repr(params))
         out = self._s.request(
             method,
             url,
             json=params,
             stream=stream,
+            allow_redirects=False,
             params=args)
+
+        # Copy CSRF to headers
+        if 'X-CSRF-Token' in out.headers:
+            self._s.headers['X-CSRF-Token'] = out.headers['X-CSRF-Token']
         
-        logger.debug("Results from %s status %i preview %s",
-                     out.url, out.status_code, out.text[:20])
+        logger.debug("Results from %s %s status %i preview %s",
+                out.url, method, out.status_code, out.text[:30])
 
 
         if raise_on_error and out.status_code != requests.codes['ok']:
             raise UnifiApiError(out)
         
         # Don't try to decode the output
-        if no_decode_return:
+        if x_decode == False:
             return out
         
         try:
@@ -507,12 +527,17 @@ class UnifiController(UnifiClientBase):
         # UnifiOS hack
         login_path = 'api/login'
         try:
-            udmp_check = self.get('/')
+            udmp_check = self.get('',x_proxy=False,x_decode=False)
+            #self._s.cookies.clear()
+            logging.debug("THIS IS UnifiOS")
             login_path = 'api/auth/login'
+            self.proxy = 'proxy/network'
+            ret =  self.post(login_path, username=username, password=password, rememberMe=remember, x_decode=False, x_proxy=False)
+            return ret
         except:
             pass
 
-        ret =  self.post(login_path, username=username, password=password, remember=remember, no_decode_return=True)
+        ret =  self.post(login_path, username=username, password=password, remember=remember)
         return ret
 
     def logout(self):
